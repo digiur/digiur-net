@@ -327,12 +327,12 @@ Set_Swap_Size() {
 Digiur_Net_Setup() {
     Show 2 "Checkout Repo..."
     GreyStart
-    ${sudo_cmd} git clone https://github.com/digiur/digiur-net.git
+    git clone https://github.com/digiur/digiur-net.git
     ColorReset
 
     Show 2 "Start Portainer..."
     GreyStart
-    ${sudo_cmd} docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
+    docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
     ColorReset
 }
 
