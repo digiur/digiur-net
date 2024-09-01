@@ -26,8 +26,8 @@ source /etc/os-release
 
 # SYSTEM REQUIREMENTS
 readonly MINIMUM_DOCKER_VERSION="20"
-readonly DEPEND_PACKAGES=('samba')
-readonly DEPEND_COMMANDS=('smbd')
+readonly DEPEND_PACKAGES=('samba' 'net-tools')
+readonly DEPEND_COMMANDS=('smbd' 'netstat')
 
 # SYSTEM INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
