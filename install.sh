@@ -10,15 +10,8 @@
 clear
 echo -e "\e[0m\c"
 
-echo '
-  ____                         ____   _____ 
- |  __ \                      / __ \ / ____|
- | |  \ \ _   _   _ _  _  __ | |  | | (___  
- | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
- | |__/ /| | (_| | | || | |  | |__| |____) |
- |_____/ |_|__  /|_|\_,_|_|   \____/|_____/ 
-          |____/                            
-'
+Welcome_Logo
+echo "INSTALL!"
 
 export PATH=/usr/sbin:$PATH
 export DEBIAN_FRONTEND=noninteractive
@@ -259,7 +252,21 @@ Get_IPs() {
     done
 }
 
+Welcome_Logo() {
+    echo '
+    ____                         ____   _____ 
+    |  __ \                      / __ \ / ____|
+    | |  \ \ _   _   _ _  _  __ | |  | | (___  
+    | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
+    | |__/ /| | (_| | | || | |  | |__| |____) |
+    |_____/ |_|__  /|_|\_,_|_|   \____/|_____/ 
+            |____/                            
+    '
+}
+
 Welcome_Banner() {
+    Welcome_Logo
+    echo "INSTALL COMPLETE!"
     echo -e "${GREEN_LINE}${aCOLOUR[1]}"
     echo -e " DigiurOS ${COLOUR_RESET} is running at${COLOUR_RESET}${GREEN_SEPARATOR}"
     echo -e "${GREEN_LINE}"
