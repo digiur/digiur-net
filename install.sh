@@ -26,8 +26,8 @@ source /etc/os-release
 
 # SYSTEM REQUIREMENTS
 readonly MINIMUM_DOCKER_VERSION="20"
-readonly DEPEND_PACKAGES=('wget' 'curl' 'smartmontools' 'parted' 'ntfs-3g' 'net-tools' 'udevil' 'samba' 'cifs-utils' 'mergerfs' 'unzip')
-readonly DEPEND_COMMANDS=('wget' 'curl' 'smartctl' 'parted' 'ntfs-3g' 'netstat' 'udevil' 'smbd' 'mount.cifs' 'mount.mergerfs' 'unzip')
+readonly DEPEND_PACKAGES=('samba')
+readonly DEPEND_COMMANDS=('smbd')
 
 # SYSTEM INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
@@ -267,14 +267,14 @@ Get_IPs() {
 
 Welcome_Logo() {
     echo '
-    ____                         ____   _____ 
+     ____                          __    _____ 
     |  __ \                      / __ \ / ____|
     | |  \ \ _   _   _ _  _  __ | |  | | (___  
     | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
     | |__/ /| | (_| | | || | |  | |__| |____) |
-    |_____/ |_|__  /|_|\_,_|_|   \____/|_____/ 
+    |_____/ |_|\_  /|_|\_,_|_|   \____/|_____/ 
              |____/                            
-    '
+'
 }
 
 Welcome_Banner() {
@@ -332,7 +332,7 @@ Digiur_Net_Setup() {
 
     Show 2 "Start Portainer..."
     GreyStart
-    ${sudo_cmd} docker compose -f portainer/docker-compose.yml up -d
+    ${sudo_cmd} docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
     ColorReset
 }
 
