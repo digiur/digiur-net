@@ -4,5 +4,5 @@
 Freshly install Ubuntu Server 24.04 and run this command:
 
 ```sh
-wget -qO- https://get.casaos.io | sudo bash
+wget -qO- https://raw.githubusercontent.com/digiur/digiur-net/main/install.sh | sudo bash
 ```
