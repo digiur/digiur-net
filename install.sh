@@ -10,10 +10,7 @@
 clear
 echo -e "\e[0m\c"
 
-Welcome_Logo
-echo "INSTALL!"
-
-export PATH=/usr/sbin:$PATH
+#export PATH=/usr/sbin:$PATH
 export DEBIAN_FRONTEND=noninteractive
 
 set -e
@@ -33,13 +30,21 @@ readonly DEPEND_PACKAGES=('wget' 'curl' 'smartmontools' 'parted' 'ntfs-3g' 'net-
 readonly DEPEND_COMMANDS=('wget' 'curl' 'smartctl' 'parted' 'ntfs-3g' 'netstat' 'udevil' 'smbd' 'mount.cifs' 'mount.mergerfs' 'unzip')
 
 # SYSTEM INFO
-PHYSICAL_MEMORY=$(LC_ALL=C free -m | awk '/Mem:/ { print $2 }')
-readonly PHYSICAL_MEMORY
+PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
+readonly PHYSICAL_MEMORY_GB
 
 FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
 readonly FREE_DISK_BYTES
 
 readonly FREE_DISK_GB=$((FREE_DISK_BYTES / 1024 / 1024))
+
+SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
+readonly SWAP_FILE
+
+SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s $SWAP_FILE)
+readonly SWAP_FILE_BYTES
+
+readonly SWAP_FILE_GB=$((SWAP_FILE_BYTES / 1024 / 1024))
 
 LSB_DIST=$( ([ -n "${ID_LIKE}" ] && echo "${ID_LIKE}") || ([ -n "${ID}" ] && echo "${ID}"))
 readonly LSB_DIST
@@ -143,6 +148,14 @@ Update_Package_Resource() {
     ${sudo_cmd} apt-get update -qq
     ColorReset
     Show 0 "Update package manager complete."
+}
+
+Upgrade_Package_Resource() {
+    Show 2 "Upgrading package manager..."
+    GreyStart
+    ${sudo_cmd} apt-get upgrade -qq
+    ColorReset
+    Show 0 "Upgrade package manager complete."
 }
 
 Install_Depends() {
@@ -281,39 +294,69 @@ Welcome_Banner() {
 }
 
 ###############################################################################
-# Main                                                                        #
+# Swap Size                                                                        #
 ###############################################################################
-usage() {
-    cat <<-EOF
-		Usage: install.sh [options]
-		Valid options are:
-		    -p <build_dir>          Specify build directory (Local install)
-		    -h                      Show this help message and exit
-	EOF
-    exit "$1"
+Set_Swap_Size() {
+    Show 2 "Turn off swap..."
+    GreyStart
+    ${sudo_cmd} swapoff $SWAP_FILE
+    ColorReset
+
+    Show 2 "Resize swap in-place..."
+    GreyStart
+    ${sudo_cmd} time sudo dd if=/dev/zero of=$SWAP_FILE count=$PHYSICAL_MEMORY_GB bs=1G
+    ColorReset
+
+    Show 2 "mkswap $SWAP_FILE..."
+    GreyStart
+    ${sudo_cmd} mkswap $SWAP_FILE
+    ${sudo_cmd} chmod 0600 $SWAP_FILE
+    ColorReset
+
+    Show 2 "Turn on swap..."
+    GreyStart
+    ${sudo_cmd} swapon $SWAP_FILE
+    ${sudo_cmd} swapon --show
+    ColorReset
+    Show 0 "Set swap size complete."
 }
 
-while getopts ":p:h" arg; do
-    case "$arg" in
-    p)
-        BUILD_DIR=$OPTARG
-        ;;
-    h)
-        usage 0
-        ;;
-    *)
-        usage 1
-        ;;
-    esac
-done
+###############################################################################
+# Digiur Repo                                                                 #
+###############################################################################
+Digiur_Net_Setup() {
+    Show 2 "Checkout Repo..."
+    GreyStart
+    ${sudo_cmd} git clone https://github.com/digiur/digiur-net.git
+    ColorReset
+
+    Show 2 "Start Portainer..."
+    GreyStart
+    ${sudo_cmd} docker compose -f portainer/docker-compose.yml up -d
+    ColorReset
+}
+
+###############################################################################
+# Main                                                                        #
+###############################################################################
+Welcome_Logo
+echo "INSTALL!..."
+#Print_Info
+
+echo "Step 0: Set Swap Size"
+Set_Swap_Size
 
 echo "Step 1: Install Depends"
 Update_Package_Resource
 Install_Depends
+Upgrade_Package_Resource
 Check_Dependency_Installation
 
 echo "Step 2: Check And Install Docker"
 Check_Docker_Install
 
-echo "Step 3: Clear Term and Show Welcome Banner"
+echo "Step 3: Digiur-net Setup"
+Digiur_Net_Setup
+
+echo "Step 4: Clear Term and Show Welcome Banner"
 Welcome_Banner
