@@ -2,7 +2,7 @@
 #
 #   This script installs DigiurOS to your system.
 #   Usage:
-#       $ wget -qO- https://get.casaos.io/ | bash
+#       $ wget -qO- https://raw.githubusercontent.com/digiur/digiur-net/main/install.sh | bash
 
 #   This only work on  Linux systems. Please
 #   open an issue if you notice any bugs.
