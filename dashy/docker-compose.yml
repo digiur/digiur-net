@@ -3,7 +3,7 @@ services:
 
   dashy:
     image: lissy93/dashy
-    container_name: Dashy
+    container_name: dashy
 
     ports:
       - 80:8080
