@@ -11,10 +11,9 @@ services:
     volumes:
       - ./app/user-data:/app/user-data
 
-
     environment:
       - UID=1000
       - GID=1000
       - NODE_ENV=production
 
-    restart: unless-stopped
+    restart: always
