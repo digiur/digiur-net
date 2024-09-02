@@ -1,0 +1,11 @@
+services:
+  dashy:
+    image: lissy93/dashy
+    container_name: Dashy
+    ports:
+      - 8080:8080
+    environment:
+      NODE_ENV: production:
+      UID: 1000
+      GID: 1000
+    restart: unless-stopped
