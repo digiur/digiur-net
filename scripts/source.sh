@@ -288,6 +288,14 @@ Set_Swap_Size() {
 # Digiur Repo                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
+    Show 2 "Start ttyd..."
+    GreyStart
+    sudo systemctl status ttyd.service
+    cp ./digiur-net/etc/ttyd /etc/default/ttyd
+    sudo systemctl restart ttyd.service
+    sudo systemctl status ttyd.service
+    ColorReset
+
     Show 2 "Start Dashy..."
     GreyStart
     docker compose -f ./digiur-net/docker/dashy/docker-compose.yml up -d
