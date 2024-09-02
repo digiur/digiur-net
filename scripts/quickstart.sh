@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-groups
 sudo groupadd docker
 groups
 getent group docker
