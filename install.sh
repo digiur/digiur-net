@@ -332,7 +332,7 @@ Digiur_Net_Setup() {
 
     Show 2 "Start Portainer..."
     GreyStart
-    docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
+    ${sudo_cmd} docker compose -f ~/digiur-net/portainer/docker-compose.yml up -d
     ColorReset
 }
 
@@ -340,7 +340,7 @@ Digiur_Net_Setup() {
 # Main                                                                        #
 ###############################################################################
 Welcome_Logo
-echo "INSTALL!..."
+echo "...INSTALL!"
 #Print_Info
 
 echo "Step 0: Set Swap Size"
