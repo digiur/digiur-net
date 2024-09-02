@@ -291,22 +291,27 @@ Set_Swap_Size() {
 Digiur_Net_Setup() {
     Show 2 "Start Dashy..."
     GreyStart
-    docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/dashy/docker-compose.yml up -d
     ColorReset
 
     Show 2 "Start Transmission..."
     GreyStart
-    docker compose -f ./digiur-net/transmission/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/transmission/docker-compose.yml up -d
     ColorReset
 
     Show 2 "Start Radarr..."
     GreyStart
-    docker compose -f ./digiur-net/radarr/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/radarr/docker-compose.yml up -d
     ColorReset
 
     Show 2 "Start Prowlarr..."
     GreyStart
-    docker compose -f ./digiur-net/prowlarr/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/prowlarr/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start Handbrake..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/handbrake/docker-compose.yml up -d
     ColorReset
 
     Show 0 "Digiur-net Setup complete."

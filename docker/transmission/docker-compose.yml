@@ -2,7 +2,7 @@
 name: transmission
 services:
   transmission:
-    image: linuxserver/transmission:4.0.4
+    image: linuxserver/transmission
     container_name: transmission
 
     ports:
