@@ -19,7 +19,7 @@ set -e
 # GOLBALS                                                                     #
 ###############################################################################
 
-((EUID)) && sudo_cmd="sudo"
+sudo_cmd="sudo"
 
 # shellcheck source=/dev/null
 source /etc/os-release
@@ -185,55 +185,36 @@ Check_Dependency_Installation() {
 ###############################################################################
 # Install Docker                                                              #
 ###############################################################################
-Check_Docker_Install() {
-    if [[ -x "$(command -v docker)" ]]; then
-        Docker_Version=$(${sudo_cmd} docker version --format '{{.Server.Version}}')
-        if [[ $? -ne 0 ]]; then
-            Install_Docker
-        elif [[ ${Docker_Version:0:2} -lt "${MINIMUM_DOCKER_VERSION}" ]]; then
-            Show 1 "Recommended minimum Docker version is \e[33m${MINIMUM_DOCKER_VERSION}.xx.xx\e[0m,\Current Docker version is \e[33m${Docker_Version}\e[0m,\nPlease uninstall current Docker and rerun the CasaOS installation script."
-            exit 1
-        else
-            Show 0 "Current Docker version is ${Docker_Version}."
-        fi
-    else
-        Install_Docker
-    fi
-}
-
 Install_Docker() {
-    Show 2 "Install the necessary dependencies: \e[33mDocker \e[0m"
-    if [[ ! -d "${PREFIX}/etc/apt/sources.list.d" ]]; then
-        ${sudo_cmd} mkdir -p "${PREFIX}/etc/apt/sources.list.d"
-    fi
+    Show 2 "Add Docker's official GPG key..."
     GreyStart
-    ${sudo_cmd} curl -fsSL https://get.docker.com | bash
+    sudo apt-get install ca-certificates curl
+    sudo install -m 0755 -d /etc/apt/keyrings
+    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    sudo chmod a+r /etc/apt/keyrings/docker.asc
     ColorReset
-    if [[ $? -ne 0 ]]; then
-        Show 1 "Installation failed, please try again."
-        exit 1
-    else
-        Check_Docker_Install_Final
-    fi
+
+    Show 2 "Add the repository to Apt sources..."
+    GreyStart
+    echo \
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+        $(. /etc/os-release && echo "$UBUNTU_CODENAME") stable" | \
+        sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    ColorReset
+    Show 0 "Docker install complete."
 }
 
-Check_Docker_Install_Final() {
-    if [[ -x "$(command -v docker)" ]]; then
-        Docker_Version=$(${sudo_cmd} docker version --format '{{.Server.Version}}')
-        if [[ $? -ne 0 ]]; then
-            Install_Docker
-        elif [[ ${Docker_Version:0:2} -lt "${MINIMUM_DOCKER_VERSION}" ]]; then
-            Show 1 "Recommended minimum Docker version is \e[33m${MINIMUM_DOCKER_VERSION}.xx.xx\e[0m,\Current Docker version is \e[33m${Docker_Version}\e[0m,\nPlease uninstall current Docker and rerun the CasaOS installation script."
-            exit 1
-        else
-            Show 0 "Current Docker version is ${Docker_Version}."
-            Check_Docker_Running
-        fi
-    else
-        Show 1 "Installation failed, please run 'curl -fsSL https://get.docker.com | bash' and rerun the CasaOS installation script."
-        exit 1
-    fi
+Check_Docker_Install() {
+    Show 2 "Verify install..."
+    GreyStart
+    Check_Docker_Running
+    docker run hello-world
+    ColorReset
+    Show 0 "Docker verify install complete."
 }
+
 
 Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
@@ -245,6 +226,18 @@ Check_Docker_Running() {
             break
         fi
     done
+}
+
+Set_Docker_User_Group() {
+    Show 2 "Set docker permissions..."
+    GreyStart
+    groups
+    getent group docker
+    ${sudo_cmd} usermod -aG docker $USER
+    getent group docker
+    newgrp docker
+    ColorReset
+    Show 0 "Docker permissions complete."
 }
 
 ###############################################################################
@@ -332,8 +325,9 @@ Digiur_Net_Setup() {
 
     Show 2 "Start Portainer..."
     GreyStart
-    ${sudo_cmd} docker compose -f ~/digiur-net/portainer/docker-compose.yml up -d
+    docker compose -f ~/digiur-net/portainer/docker-compose.yml up -d
     ColorReset
+    Show 0 "Digiur-net Setup complete."
 }
 
 ###############################################################################
@@ -353,6 +347,8 @@ Upgrade_Package_Resource
 Check_Dependency_Installation
 
 echo "Step 2: Check And Install Docker"
+Install_Docker
+Set_Docker_User_Group
 Check_Docker_Install
 
 echo "Step 3: Digiur-net Setup"
