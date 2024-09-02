@@ -14,8 +14,6 @@ services:
       - 89:80
 
     volumes:
-      - type: bind
-        source: /DATA/AppData/snapdrop/config
-        target: /config
+      - ./config:/config
 
     restart: unless-stopped
