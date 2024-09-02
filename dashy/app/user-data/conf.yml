@@ -15,7 +15,7 @@ appConfig:
 
 # Main content - An array of sections, each containing an array of items
 sections:
-- name: Getting Started
+- name: Digiur-Net Ho!
   icon: fas fa-rocket
   items:
   - title: Dashy Live
