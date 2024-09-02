@@ -1,5 +1,5 @@
 # digiur-net
-### Quick Setup CasaOS
+### Quick Setup digiur-net
 
 Freshly install Ubuntu Server 24.04 and run this command:
 
