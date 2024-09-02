@@ -3,9 +3,6 @@ source ./digiur-net/scripts/source.sh
 Welcome_Logo
 echo "...INSTALL!"
 
-echo -n "Ready to install. Press any key to continue..."
-read -n 1 -s
-
 echo "Step 0: Set Swap Size"
 Set_Swap_Size
 
