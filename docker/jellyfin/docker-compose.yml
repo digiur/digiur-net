@@ -23,7 +23,6 @@ services:
 
     devices:
       - /dev/dri:/dev/dri
-      - /dev/vchiq:/dev/vchiq
       - /dev/video10:/dev/video10
       - /dev/video11:/dev/video11
       - /dev/video12:/dev/video12
