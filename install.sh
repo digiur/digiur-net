@@ -215,7 +215,7 @@ Check_Docker_Install() {
     Show 2 "Verify install..."
     GreyStart
     Check_Docker_Running
-    docker run hello-world
+    sudo docker run hello-world
     ColorReset
     Show 0 "Docker verify install complete."
 }
@@ -233,36 +233,36 @@ Check_Docker_Running() {
     done
 }
 
-Set_Docker_User_Group() {
-    Show 2 "Set docker permissions..."
+# Set_Docker_User_Group() {
+#     Show 2 "Set docker permissions..."
 
-    Show 2 "groups"
-    GreyStart
-    groups
-    ColorReset
+#     Show 2 "groups"
+#     GreyStart
+#     groups
+#     ColorReset
 
-    Show 2 "getent group docker"
-    GreyStart
-    getent group docker
-    ColorReset
+#     Show 2 "getent group docker"
+#     GreyStart
+#     getent group docker
+#     ColorReset
 
-    Show 2 "usermod"
-    GreyStart
-    ${sudo_cmd} usermod -aG docker $USER
-    ColorReset
+#     Show 2 "usermod"
+#     GreyStart
+#     ${sudo_cmd} usermod -aG docker $USER
+#     ColorReset
 
-    Show 2 "getent group docker"
-    GreyStart
-    getent group docker
-    ColorReset
+#     Show 2 "getent group docker"
+#     GreyStart
+#     getent group docker
+#     ColorReset
 
-    # Show 2 "newgrp"
-    # GreyStart
-    # newgrp docker
-    # ColorReset
+#     # Show 2 "newgrp"
+#     # GreyStart
+#     # newgrp docker
+#     # ColorReset
 
-    Show 0 "Docker permissions complete."
-}
+#     Show 0 "Docker permissions complete."
+# }
 
 ###############################################################################
 # Welcome Helpers                                                             #
@@ -372,7 +372,7 @@ Check_Dependency_Installation
 
 echo "Step 2: Check And Install Docker"
 Install_Docker
-Set_Docker_User_Group
+#Set_Docker_User_Group
 Check_Docker_Install
 
 echo "Step 3: Digiur-net Setup"
