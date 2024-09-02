@@ -5,16 +5,16 @@ services:
     image: linuxserver/radarr
     container_name: radarr
 
+    environment:
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
     ports:
       - 7878:7878
 
     volumes:
       - ./config:/config
       - /storage:/storage
-
-    environment:
-      PGID: 1000
-      PUID: 1000
-      TZ: America/Denver
 
     restart: unless-stopped

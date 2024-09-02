@@ -5,14 +5,14 @@ services:
     image: jlesage/handbrake
     container_name: handbrake
 
+    environment:
+      USER_ID: 1000
+
     ports:
       - 5800:5800
 
     volumes:
       - ./config:/config
       - /storage:/storage
-
-    environment:
-      USER_ID: 1000
 
     restart: unless-stopped

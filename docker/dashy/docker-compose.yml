@@ -5,15 +5,15 @@ services:
     image: lissy93/dashy
     container_name: dashy
 
+    environment:
+      UID: 1000
+      GID: 1000
+      NODE_ENV: production
+
     ports:
       - 80:8080
 
     volumes:
       - ./app/user-data:/app/user-data
-
-    environment:
-      UID: 1000
-      GID: 1000
-      NODE_ENV: production
 
     restart: always

@@ -11,8 +11,8 @@ source /etc/os-release
 
 # SYSTEM REQUIREMENTS
 readonly MINIMUM_DOCKER_VERSION="20"
-readonly DEPEND_PACKAGES=('samba' 'net-tools')
-readonly DEPEND_COMMANDS=('smbd' 'netstat')
+readonly DEPEND_PACKAGES=('ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
+readonly DEPEND_COMMANDS=('ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
 
 # MEMORY INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
@@ -166,7 +166,6 @@ Check_Dependency_Installation() {
 Install_Docker() {
     Show 2 "Add Docker's official GPG key..."
     GreyStart
-    sudo apt-get install ca-certificates curl
     sudo install -m 0755 -d /etc/apt/keyrings
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
     sudo chmod a+r /etc/apt/keyrings/docker.asc

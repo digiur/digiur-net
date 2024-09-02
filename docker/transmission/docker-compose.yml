@@ -5,6 +5,14 @@ services:
     image: linuxserver/transmission
     container_name: transmission
 
+    environment:
+      USER: digi
+      PASS: 733stsbytes
+      PEERPORT: 51413
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
     ports:
       - target: 9091
         published: 9091
@@ -19,13 +27,5 @@ services:
     volumes:
       - ./config:/config
       - /storage/downloads:/storage/downloads
-
-    environment:
-      USER: digi
-      PASS: 733stsbytes
-      PEERPORT: 51413
-      PGID: 1000
-      PUID: 1000
-      TZ: America/Denver
 
     restart: unless-stopped
