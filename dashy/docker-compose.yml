@@ -9,7 +9,7 @@ services:
       - 80:8080
 
     volumes:
-      - ./app/user-data/conf.yml:/app/user-data/conf.yml
+      - /mnt/dashy/app/user-data/conf.yml:/app/user-data/conf.yml
 
 
     environment:
