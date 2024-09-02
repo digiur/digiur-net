@@ -9,7 +9,7 @@ services:
       - 80:8080
 
     volumes:
-      - /my-dashy/app/user-data:/app/user-data
+      - ~/my-dashy/app/user-data:/app/user-data
 
 
     environment:
