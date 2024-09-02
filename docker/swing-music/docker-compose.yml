@@ -1,0 +1,15 @@
+---
+name: swing-music
+services:
+  swing-music:
+    image: ghcr.io/swingmx/swingmusic
+    container_name: swing-music
+
+    ports:
+      - 1970:1970
+
+    volumes:
+      - ./config:/config
+      - /storage/music:/music
+
+    restart: unless-stopped

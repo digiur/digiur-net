@@ -1,0 +1,21 @@
+---
+name: snapdrop
+services:
+  snapdrop:
+    image: linuxserver/snapdrop
+    container_name: snapdrop
+
+    environment:
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
+    ports:
+      - 89:80
+
+    volumes:
+      - type: bind
+        source: /DATA/AppData/snapdrop/config
+        target: /config
+
+    restart: unless-stopped

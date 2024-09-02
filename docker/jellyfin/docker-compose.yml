@@ -1,0 +1,32 @@
+---
+name: jellyfin
+services:
+  jellyfin:
+    image: linuxserver/jellyfin:10.9.8
+    container_name: jellyfin
+
+    environment:
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
+    ports:
+      - 8096:8096
+      - 8920:8921
+      - 7359:7359
+      - 1900:1901
+
+    volumes:
+      - ./config:/config
+      - /storage:/storage
+      - /opt/vc/lib:/opt/vc/lib
+
+    devices:
+      - /dev/dri:/dev/dri
+      - /dev/vcsm:/dev/vcsm
+      - /dev/vchiq:/dev/vchiq
+      - /dev/video10:/dev/video10
+      - /dev/video11:/dev/video11
+      - /dev/video12:/dev/video12
+
+    restart: unless-stopped

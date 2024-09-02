@@ -1,0 +1,15 @@
+---
+name: alist
+services:
+  alist:
+    image: xhofe/alist
+    container_name: alist
+
+    ports:
+      - 5244:5244
+
+    volumes:
+      - ./opt/alist/data:/opt/alist/data
+      - /storage:/Storage
+
+    restart: unless-stopped

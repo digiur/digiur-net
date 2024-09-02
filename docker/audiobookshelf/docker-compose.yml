@@ -1,0 +1,20 @@
+---
+name: audiobookshelf
+services:
+  audiobookshelf:
+    image: advplyr/audiobookshelf
+    container_name: audiobookshelf
+
+    environment:
+      TZ: America/Denver
+
+    ports:
+      - 13378:80
+
+    volumes:
+      - ./metadata:/metadata
+      - ./config:/config
+      - /storage/audiobooks:/audiobooks
+      - /storage/podcasts:/podcasts
+
+    restart: unless-stopped
