@@ -11,8 +11,8 @@ source /etc/os-release
 
 # SYSTEM REQUIREMENTS
 readonly MINIMUM_DOCKER_VERSION="20"
-readonly DEPEND_PACKAGES=('ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
-readonly DEPEND_COMMANDS=('ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
+readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
+readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
 
 # MEMORY INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
