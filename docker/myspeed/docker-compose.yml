@@ -4,6 +4,7 @@ services:
   myspeed:
     image: germannewsmaker/myspeed
     container_name: myspeed
+
     ports:
       - 5216:5216
 

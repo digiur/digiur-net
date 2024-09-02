@@ -1,0 +1,45 @@
+---
+name: romm
+volumes:
+  romm_redis_data:
+services:
+  romm:
+    image: rommapp/romm:latest
+    container_name: romm
+    depends_on:
+      - romm-db
+
+    environment:
+      DB_HOST: romm-db
+      DB_NAME: romm # Should match MYSQL_DATABASE in mariadb
+      DB_USER: romm-user # Should match MYSQL_USER in mariadb
+      DB_PASSWD: rommdbpw # Should match MYSQL_PASSWORD in mariadb
+      ROMM_AUTH_SECRET_KEY: 482fb96ccae823f9c48b1e35a0bb81308e9464bab10d2491b06054a165f450ed # Generate a key with `openssl rand -hex 32`
+      IGDB_CLIENT_ID: 9prkdmhfdazhue2vjzd6zrm5n5g12c # Generate an ID and SECRET in IGDB
+      IGDB_CLIENT_SECRET: le2k5jbg1rttfya17nwpyrgmg1384z # https://api-docs.igdb.com/#account-creation
+      ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: true
+      TZ: America/Denver
+
+    volumes:
+      - ./romm/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
+      - romm_redis_data:/redis-data # Cached data for background tasks
+      - /path/to/library:/romm/library # Your game library
+      - ./romm/assets:/romm/assets # Uploaded saves, states, etc.
+      - ./romm/config:/romm/config # Path where config.yml is stored
+
+    ports:
+      - 82:8080
+
+    restart: unless-stopped
+
+  romm-db:
+    image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
+    container_name: romm-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=yohoyoho # Use a unique, secure password
+      - MYSQL_DATABASE=romm
+      - MYSQL_USER=romm-user
+      - MYSQL_PASSWORD=rommdbpw
+    volumes:
+      - ./var/lib/mysql:/var/lib/mysql

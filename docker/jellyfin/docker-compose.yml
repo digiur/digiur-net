@@ -2,7 +2,7 @@
 name: jellyfin
 services:
   jellyfin:
-    image: linuxserver/jellyfin:10.9.8
+    image: linuxserver/jellyfin
     container_name: jellyfin
 
     environment:
