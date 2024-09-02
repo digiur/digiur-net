@@ -1,6 +1,6 @@
 ---
+name: dashy
 services:
-
   dashy:
     image: lissy93/dashy
     container_name: dashy
@@ -12,8 +12,8 @@ services:
       - ./app/user-data:/app/user-data
 
     environment:
-      - UID=1000
-      - GID=1000
-      - NODE_ENV=production
+      UID: 1000
+      GID: 1000
+      NODE_ENV: production
 
     restart: always

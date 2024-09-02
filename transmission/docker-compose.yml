@@ -1,0 +1,31 @@
+---
+name: transmission
+services:
+  transmission:
+    image: linuxserver/transmission:4.0.4
+    container_name: transmission
+
+    ports:
+      - target: 9091
+        published: 9091
+        protocol: tcp
+      - target: 51413
+        published: 51413
+        protocol: tcp
+      - target: 51413
+        published: 51413
+        protocol: UDP
+
+    volumes:
+      - ./config:/config
+      - /storage/downloads:/storage/downloads
+
+    environment:
+      USER: digi
+      PASS: 733stsbytes
+      PEERPORT: 51413
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
+    restart: unless-stopped

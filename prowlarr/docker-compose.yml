@@ -1,0 +1,19 @@
+---
+name: prowlarr
+services:
+  prowlarr:
+    image: linuxserver/prowlarr
+    container_name: prowlarr
+
+    ports:
+      - 9696:9696
+
+    volumes:
+      - ./config:/config
+
+    environment:
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
+    restart: unless-stopped

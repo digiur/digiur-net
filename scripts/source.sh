@@ -294,5 +294,20 @@ Digiur_Net_Setup() {
     docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
     ColorReset
 
+    Show 2 "Start Transmission..."
+    GreyStart
+    docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start Radarr..."
+    GreyStart
+    docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start Prowlarr..."
+    GreyStart
+    docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
+    ColorReset
+
     Show 0 "Digiur-net Setup complete."
 }
