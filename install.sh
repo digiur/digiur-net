@@ -256,10 +256,10 @@ Set_Docker_User_Group() {
     getent group docker
     ColorReset
 
-    Show 2 "newgrp"
-    GreyStart
-    newgrp docker
-    ColorReset
+    # Show 2 "newgrp"
+    # GreyStart
+    # newgrp docker
+    # ColorReset
 
     Show 0 "Docker permissions complete."
 }
