@@ -23,8 +23,5 @@ services:
 
     devices:
       - /dev/dri:/dev/dri
-      - /dev/video10:/dev/video10
-      - /dev/video11:/dev/video11
-      - /dev/video12:/dev/video12
 
     restart: unless-stopped
