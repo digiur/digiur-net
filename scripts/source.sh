@@ -1,27 +1,12 @@
 #!/usr/bin/bash
-#
-#   This script installs DigiurOS to your system.
-#   Usage:
-#       $ wget -qO- https://raw.githubusercontent.com/digiur/digiur-net/main/install.sh | bash
-
-#   This only work on  Linux systems. Please
-#   open an issue if you notice any bugs.
-#
-clear
-echo -e "\e[0m\c"
-
-#export PATH=/usr/sbin:$PATH
-export DEBIAN_FRONTEND=noninteractive
-
-set -e
-
 ###############################################################################
 # GOLBALS                                                                     #
 ###############################################################################
-
-sudo_cmd="sudo"
-
 # shellcheck source=/dev/null
+clear
+echo -e "\e[0m\c"
+set -e
+
 source /etc/os-release
 
 # SYSTEM REQUIREMENTS
@@ -29,10 +14,11 @@ readonly MINIMUM_DOCKER_VERSION="20"
 readonly DEPEND_PACKAGES=('samba' 'net-tools')
 readonly DEPEND_COMMANDS=('smbd' 'netstat')
 
-# SYSTEM INFO
+# MEMORY INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
 readonly PHYSICAL_MEMORY_GB
 
+# DISK INFO
 FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
 readonly FREE_DISK_BYTES
 
@@ -71,12 +57,6 @@ readonly aCOLOUR=(
 readonly GREEN_LINE=" ${aCOLOUR[0]}─────────────────────────────────────────────────────$COLOUR_RESET"
 readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
 readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
-
-# CASAOS VARIABLES
-TARGET_ARCH=""
-TMP_ROOT=/tmp/casaos-installer
-REGION="UNKNOWN"
-CASA_DOWNLOAD_DOMAIN="https://github.com/"
 
 trap 'onCtrlC' INT
 onCtrlC() {
@@ -126,7 +106,6 @@ ColorReset() {
 
 # Clear Terminal
 Clear_Term() {
-
     # Without an input terminal, there is no point in doing this.
     [[ -t 0 ]] || return
 
@@ -136,7 +115,6 @@ Clear_Term() {
 
     for ((i = 1; i < ${lines% *}; i++)); do newlines+='\n'; done
     echo -ne "\e[0m$newlines\e[H"
-
 }
 
 ###############################################################################
@@ -145,7 +123,7 @@ Clear_Term() {
 Update_Package_Resource() {
     Show 2 "Updating package manager..."
     GreyStart
-    ${sudo_cmd} apt-get update -qq
+    sudo apt-get update -qq
     ColorReset
     Show 0 "Update package manager complete."
 }
@@ -153,7 +131,7 @@ Update_Package_Resource() {
 Upgrade_Package_Resource() {
     Show 2 "Upgrading package manager..."
     GreyStart
-    ${sudo_cmd} apt-get upgrade -qq
+    sudo apt-get upgrade -qq
     ColorReset
     Show 0 "Upgrade package manager complete."
 }
@@ -161,11 +139,11 @@ Upgrade_Package_Resource() {
 Install_Depends() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
         cmd=${DEPEND_COMMANDS[i]}
-        if [[ ! -x $(${sudo_cmd} which "$cmd") ]]; then
+        if [[ ! -x $(sudo which "$cmd") ]]; then
             packageNeeded=${DEPEND_PACKAGES[i]}
             Show 2 "Install the necessary dependency: \e[33m$packageNeeded \e[0m"
             GreyStart
-            ${sudo_cmd} apt-get -y -qq install "$packageNeeded" --no-upgrade
+            sudo apt-get -y -qq install "$packageNeeded" --no-upgrade
             ColorReset
         fi
     done
@@ -174,7 +152,7 @@ Install_Depends() {
 Check_Dependency_Installation() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
         cmd=${DEPEND_COMMANDS[i]}
-        if [[ ! -x $(${sudo_cmd} which "$cmd") ]]; then
+        if [[ ! -x $(sudo which "$cmd") ]]; then
             packageNeeded=${DEPEND_PACKAGES[i]}
             Show 1 "Dependency \e[33m$packageNeeded \e[0m installation failed, please try again manually!"
             exit 1
@@ -224,51 +202,20 @@ Check_Docker_Install() {
 Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
         sleep 3
-        if [[ ! $(${sudo_cmd} systemctl is-active docker) == "active" ]]; then
+        if [[ ! $(sudo systemctl is-active docker) == "active" ]]; then
             Show 1 "Docker is not running, try to start"
-            ${sudo_cmd} systemctl start docker
+            sudo systemctl start docker
         else
             break
         fi
     done
 }
 
-# Set_Docker_User_Group() {
-#     Show 2 "Set docker permissions..."
-
-#     Show 2 "groups"
-#     GreyStart
-#     groups
-#     ColorReset
-
-#     Show 2 "getent group docker"
-#     GreyStart
-#     getent group docker
-#     ColorReset
-
-#     Show 2 "usermod"
-#     GreyStart
-#     ${sudo_cmd} usermod -aG docker $USER
-#     ColorReset
-
-#     Show 2 "getent group docker"
-#     GreyStart
-#     getent group docker
-#     ColorReset
-
-#     # Show 2 "newgrp"
-#     # GreyStart
-#     # newgrp docker
-#     # ColorReset
-
-#     Show 0 "Docker permissions complete."
-# }
-
 ###############################################################################
 # Welcome Helpers                                                             #
 ###############################################################################
 Get_IPs() {
-    PORT=$(${sudo_cmd} cat ${CASA_CONF_PATH} | grep port | sed 's/port=//')
+    PORT=$(sudo cat ${CASA_CONF_PATH} | grep port | sed 's/port=//')
     ALL_NIC=$($sudo_cmd ls /sys/class/net/ | grep -v "$(ls /sys/devices/virtual/net/)")
     for NIC in ${ALL_NIC}; do
         IP=$($sudo_cmd ifconfig "${NIC}" | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | sed -e 's/addr://g')
@@ -304,8 +251,8 @@ Welcome_Banner() {
     echo -e " Open your browser and visit the above address."
     echo -e "${GREEN_LINE}"
     echo -e ""
-    echo -e " ${aCOLOUR[2]}DigiurOS Project  : https://github.com/digiur/digiur-net"
-    echo -e " ${aCOLOUR[2]}CasaOS Discord    : https://discord.gg/CBFae73u"
+    echo -e " ${aCOLOUR[2]}DigiurOS on Github  : https://github.com/digiur/digiur-net"
+    echo -e " ${aCOLOUR[2]}DigiurOS Discord    : https://discord.gg/CBFae73u"
     echo -e ""
     echo -e "${COLOUR_RESET}"
 }
@@ -316,24 +263,24 @@ Welcome_Banner() {
 Set_Swap_Size() {
     Show 2 "Turn off swap..."
     GreyStart
-    ${sudo_cmd} swapoff $SWAP_FILE
+    sudo swapoff $SWAP_FILE
     ColorReset
 
     Show 2 "Resize swap in-place..."
     GreyStart
-    ${sudo_cmd} time sudo dd if=/dev/zero of=$SWAP_FILE count=$PHYSICAL_MEMORY_GB bs=1G
+    sudo time sudo dd if=/dev/zero of=$SWAP_FILE count=$PHYSICAL_MEMORY_GB bs=1G
     ColorReset
 
     Show 2 "mkswap $SWAP_FILE..."
     GreyStart
-    ${sudo_cmd} mkswap $SWAP_FILE
-    ${sudo_cmd} chmod 0600 $SWAP_FILE
+    sudo mkswap $SWAP_FILE
+    sudo chmod 0600 $SWAP_FILE
     ColorReset
 
     Show 2 "Turn on swap..."
     GreyStart
-    ${sudo_cmd} swapon $SWAP_FILE
-    ${sudo_cmd} swapon --show
+    sudo swapon $SWAP_FILE
+    sudo swapon --show
     ColorReset
     Show 0 "Set swap size complete."
 }
@@ -342,41 +289,9 @@ Set_Swap_Size() {
 # Digiur Repo                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
-    Show 2 "Checkout Repo..."
-    GreyStart
-    git clone https://github.com/digiur/digiur-net.git
-    ColorReset
-
     Show 2 "Start Portainer..."
     GreyStart
-    docker compose -f ~/digiur-net/portainer/docker-compose.yml up -d
+    docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
     ColorReset
     Show 0 "Digiur-net Setup complete."
 }
-
-###############################################################################
-# Main                                                                        #
-###############################################################################
-Welcome_Logo
-echo "...INSTALL!"
-#Print_Info
-
-echo "Step 0: Set Swap Size"
-Set_Swap_Size
-
-echo "Step 1: Install Depends"
-Update_Package_Resource
-Install_Depends
-Upgrade_Package_Resource
-Check_Dependency_Installation
-
-echo "Step 2: Check And Install Docker"
-Install_Docker
-#Set_Docker_User_Group
-Check_Docker_Install
-
-echo "Step 3: Digiur-net Setup"
-Digiur_Net_Setup
-
-echo "Step 4: Clear Term and Show Welcome Banner"
-Welcome_Banner
