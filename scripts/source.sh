@@ -289,9 +289,10 @@ Set_Swap_Size() {
 # Digiur Repo                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
-    Show 2 "Start Portainer..."
+    Show 2 "Start Dashy..."
     GreyStart
-    docker compose -f ./digiur-net/portainer/docker-compose.yml up -d
+    docker compose -f ./digiur-net/dashy/docker-compose.yml up -d
     ColorReset
+
     Show 0 "Digiur-net Setup complete."
 }
