@@ -296,29 +296,99 @@ Digiur_Net_Setup() {
     sudo systemctl status ttyd.service
     ColorReset
 
-    Show 2 "Start Dashy..."
+    Show 2 "Start alist..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/alist/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start audiobookshelf..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/audiobookshelf/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start dashy..."
     GreyStart
     docker compose -f ./digiur-net/docker/dashy/docker-compose.yml up -d
     ColorReset
 
-    Show 2 "Start Transmission..."
+    Show 2 "Start handbrake..."
     GreyStart
-    docker compose -f ./digiur-net/docker/transmission/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/handbrake/docker-compose.yml up -d
     ColorReset
 
-    Show 2 "Start Radarr..."
+    Show 2 "Start jellyfin..."
     GreyStart
-    docker compose -f ./digiur-net/docker/radarr/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/jellyfin/docker-compose.yml up -d
     ColorReset
 
-    Show 2 "Start Prowlarr..."
+    Show 2 "Start librespeed..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/librespeed/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start mealie..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/mealie/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start memos..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/memos/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start myspeed..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/myspeed/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start navidrome..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/navidrome/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start portainer..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/portainer/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start prowlarr..."
     GreyStart
     docker compose -f ./digiur-net/docker/prowlarr/docker-compose.yml up -d
     ColorReset
 
-    Show 2 "Start Handbrake..."
+    Show 2 "Start qdirstat..."
     GreyStart
-    docker compose -f ./digiur-net/docker/handbrake/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/qdirstat/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start radarr..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/radarr/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start romm..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/romm/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start snapdrop..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/snapdrop/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start swing-music..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/swing-music/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start transmission..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/transmission/docker-compose.yml up -d
+    ColorReset
+
+    Show 2 "Start uptime-kuma..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/uptime-kuma/docker-compose.yml up -d
     ColorReset
 
     Show 0 "Digiur-net Setup complete."
