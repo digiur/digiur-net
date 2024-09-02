@@ -3,7 +3,7 @@
 # GOLBALS                                                                     #
 ###############################################################################
 # shellcheck source=/dev/null
-clear
+#clear
 echo -e "\e[0m\c"
 set -e
 
