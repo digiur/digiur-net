@@ -1,14 +1,20 @@
 ---
 services:
+
   dashy:
     image: lissy93/dashy
     container_name: Dashy
-    volumes:
-      - ./dashy/app/user-data/conf.yml:/app/user-data/conf.yml
+
     ports:
       - 80:8080
+
+    volumes:
+      - ./app/user-data/conf.yml:/app/user-data/conf.yml
+
+
     environment:
-      - NODE_ENV=production
       - UID=1000
       - GID=1000
+      - NODE_ENV=production
+
     restart: unless-stopped
