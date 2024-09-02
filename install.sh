@@ -235,13 +235,32 @@ Check_Docker_Running() {
 
 Set_Docker_User_Group() {
     Show 2 "Set docker permissions..."
+
+    Show 2 "groups"
     GreyStart
     groups
+    ColorReset
+
+    Show 2 "getent group docker"
+    GreyStart
     getent group docker
+    ColorReset
+
+    Show 2 "usermod"
+    GreyStart
     ${sudo_cmd} usermod -aG docker $USER
+    ColorReset
+
+    Show 2 "getent group docker"
+    GreyStart
     getent group docker
+    ColorReset
+
+    Show 2 "newgrp"
+    GreyStart
     newgrp docker
     ColorReset
+
     Show 0 "Docker permissions complete."
 }
 
