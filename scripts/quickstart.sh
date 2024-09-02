@@ -4,6 +4,4 @@ groups
 getent group docker
 sudo usermod -aG docker $USER
 getent group docker
-echo -n "Ready to install. Press any key to continue..."
-read -n 1 -s
-bash -c ./digiur-net/scripts/install.sh
+sg docker -c ./digiur-net/scripts/install.sh
