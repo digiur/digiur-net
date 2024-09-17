@@ -26,6 +26,6 @@ services:
 
     volumes:
       - ./config:/config
-      - /storage/downloads:/storage/downloads
+      - /DATA/Storage/Downloads/:/DATA/Storage/Downloads/
 
     restart: unless-stopped
