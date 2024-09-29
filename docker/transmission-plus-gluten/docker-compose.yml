@@ -43,8 +43,8 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
-      - OPENVPN_USER=JGtxmAcnVk0cvZGp+pmp
-      - OPENVPN_PASSWORD=7VymDvSipUDYNdqrd9uJPHsnAmywPAud
+      - OPENVPN_USER=oI9hHMYQlkSbDA8i
+      - OPENVPN_PASSWORD=tDp06H6rx2I0jXeAHOZx2LZ7Y2CADPbi
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
       - SERVER_COUNTRIES=Switzerland
