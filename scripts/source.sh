@@ -371,6 +371,11 @@ Digiur_Net_Setup() {
     docker compose -f ./digiur-net/docker/romm/docker-compose.yml up -d
     ColorReset
 
+    Show 2 "Start sonarr..."
+    GreyStart
+    docker compose -f ./digiur-net/docker/sonarr/docker-compose.yml up -d
+    ColorReset
+
     Show 2 "Start snapdrop..."
     GreyStart
     docker compose -f ./digiur-net/docker/snapdrop/docker-compose.yml up -d
