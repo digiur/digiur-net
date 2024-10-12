@@ -71,7 +71,7 @@ fi
 
 # Run the 'install.sh' script
 log "Running '$INSTALL_SCRIPT'..."
-if $INSTALL_SCRIPT &>> $LOG_FILE; then
+if $INSTALL_SCRIPT; then
     log "'$INSTALL_SCRIPT' executed successfully."
 else
     log "Failed to execute '$INSTALL_SCRIPT'. Check the log for details."
