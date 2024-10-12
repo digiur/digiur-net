@@ -386,9 +386,9 @@ Digiur_Net_Setup() {
     docker compose -f ./digiur-net/docker/swing-music/docker-compose.yml up -d
     ColorReset
 
-    Show 2 "Start transmission..."
+    Show 2 "Start transmission+gluetun..."
     GreyStart
-    docker compose -f ./digiur-net/docker/transmission/docker-compose.yml up -d
+    docker compose -f ./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml up -d
     ColorReset
 
     Show 2 "Start uptime-kuma..."

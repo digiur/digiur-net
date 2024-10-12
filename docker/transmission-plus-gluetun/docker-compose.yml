@@ -1,0 +1,53 @@
+---
+name: transmission-plus-gluetun
+services:
+  transmissionplus:
+    image: linuxserver/transmission
+    container_name: transmissionplus
+
+    network_mode: "service:gluetun"
+
+    volumes:
+      - ./transmission/config:/config
+      - /storage/downloads:/storage/downloads
+
+    environment:
+      USER: mo
+      PASS: yohoyoho
+      PEERPORT: 60357
+      PGID: 1000
+      PUID: 1000
+      TZ: America/Denver
+
+    restart: unless-stopped
+
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+
+    cap_add:
+      - NET_ADMIN
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    ports:
+      - 9001:9000/tcp
+      - 9091:9091/tcp
+      - 60357:60357/tcp
+      - 60357:60357/udp
+
+    volumes:
+      - ./gluetun:/gluetun
+
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=openvpn
+      - OPENVPN_USER=***Replace With Open VPN Username and Password***
+      - OPENVPN_PASSWORD=***Replace With Open VPN Username and Password***
+      - PORT_FORWARD_ONLY=off
+      - VPN_PORT_FORWARDING=off
+      - SERVER_COUNTRIES=Switzerland
+      - TZ=America/Denver
+
+    restart: always
