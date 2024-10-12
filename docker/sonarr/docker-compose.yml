@@ -11,9 +11,7 @@ services:
       TZ: America/Denver
 
     ports:
-      - target: 8989
-        published: "8989"
-        protocol: tcp
+      - 8989:8989
 
     volumes:
       - ./config

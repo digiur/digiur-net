@@ -28,7 +28,7 @@ services:
       - ./romm/config:/romm/config # Path where config.yml is stored
 
     ports:
-      - 82:8080
+      - 1337:8080
 
     restart: unless-stopped
 
