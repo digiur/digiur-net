@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-LOG_FILE="install_digiur_log.txt"
+LOG_FILE="install_log.txt"
 
 # Function to log messages
 log() {
