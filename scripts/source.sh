@@ -161,7 +161,7 @@ Check_Dependency_Installation() {
 }
 
 ###############################################################################
-# Install Docker                                                              #
+# Install Docker # https://docs.docker.com/engine/install/ubuntu/             #
 ###############################################################################
 Install_Docker() {
     Show 2 "Add Docker's official GPG key..."
