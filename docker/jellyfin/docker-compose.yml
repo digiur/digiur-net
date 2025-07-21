@@ -19,9 +19,10 @@ services:
     volumes:
       - ./config:/config
       - /storage:/storage
-      - /opt/vc/lib:/opt/vc/lib
 
+    
     devices:
+      # GPU device for hardware video transcoding (Intel/AMD VAAPI)
       - /dev/dri:/dev/dri
 
     restart: unless-stopped

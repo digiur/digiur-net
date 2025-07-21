@@ -1,3 +1,11 @@
+# Transmission Plus Gluetun stack
+# This setup ensures Transmission can ONLY
+# access the internet through the VPN (Gluetun).
+# If Gluetun is stopped, Transmission has NO inetrnet access.
+# If Gluetun is running but not connected to the VPN,
+# Transmission's traffic will be routed through Gluetun,
+# but may be blocked or dropped by Gluetun's firewall.
+# This prevents leaks and enforces VPN-only usage.
 ---
 name: transmission-plus-gluetun
 services:
@@ -5,6 +13,8 @@ services:
     image: linuxserver/transmission
     container_name: transmissionplus
 
+    # All Transmission network traffic is routed through the Gluetun VPN container.
+    # This is enforced by network_mode: "service:gluetun"
     network_mode: "service:gluetun"
 
     volumes:
@@ -12,8 +22,10 @@ services:
       - /storage/downloads:/storage/downloads
 
     environment:
-      USER: mo
-      PASS: yohoyoho
+      # The following placeholders are replaced with real credentials by install.sh
+      # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
+      USER: __TRANSMISSION_USER__
+      PASS: __TRANSMISSION_PASS__
       PEERPORT: 60357
       PGID: 1000
       PUID: 1000
@@ -25,12 +37,18 @@ services:
     image: qmcgaw/gluetun
     container_name: gluetun
 
+    # NET_ADMIN and /dev/net/tun are required for VPN operation
     cap_add:
       - NET_ADMIN
 
     devices:
       - /dev/net/tun:/dev/net/tun
 
+    # Only Gluetun exposes ports to the host. Transmission's web UI and peer
+    # ports are only available if Gluetun is up and connected. If Gluetun is
+    # running but not connected to the VPN, these ports may be unreachable or
+    # blocked by Gluetun's firewall. This prevents Transmission from ever using
+    # the host network directly.
     ports:
       - 9001:9000/tcp
       - 9091:9091/tcp
@@ -41,10 +59,12 @@ services:
       - ./gluetun:/gluetun
 
     environment:
+      # The following placeholders are replaced with real credentials by install.sh
+      # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
-      - OPENVPN_USER=***Replace With Open VPN Username and Password***
-      - OPENVPN_PASSWORD=***Replace With Open VPN Username and Password***
+      - OPENVPN_USER=__VPN_USER__
+      - OPENVPN_PASSWORD=__VPN_PASS__
       - PORT_FORWARD_ONLY=off
       - VPN_PORT_FORWARDING=off
       - SERVER_COUNTRIES=Switzerland

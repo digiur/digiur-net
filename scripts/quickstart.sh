@@ -36,6 +36,8 @@ else
 
     # Inform user to log out/in and exit
     log "Group change will be applied after logging out and back in."
+    log "Before running this script again, edit the file ./transmission+gluetun.env and fill in your Transmission and VPN credentials."
+    log "Find your credentials here: https://protonvpn.com/support/vpn-login (Use your OpenVPN / IKEv2 username and password)"
     log "Please log out and log back in to apply the group change, then rerun this script to continue."
     exit 0
 fi

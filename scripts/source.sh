@@ -1,9 +1,4 @@
 #!/usr/bin/bash
-###############################################################################
-# GOLBALS                                                                     #
-###############################################################################
-# shellcheck source=/dev/null
-#clear
 echo -e "\e[0m\c"
 set -e
 
@@ -11,8 +6,10 @@ source /etc/os-release
 
 # SYSTEM REQUIREMENTS
 readonly MINIMUM_DOCKER_VERSION="20"
-readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
-readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
+# readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
+# readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
+readonly DEPEND_PACKAGES=('btop' 'curl' 'samba' 'net-tools' 'ca-certificates')
+readonly DEPEND_COMMANDS=('btop' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
 
 # MEMORY INFO
 PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
@@ -21,28 +18,14 @@ readonly PHYSICAL_MEMORY_GB
 # DISK INFO
 FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
 readonly FREE_DISK_BYTES
-
 readonly FREE_DISK_GB=$((FREE_DISK_BYTES / 1024 / 1024))
 
+# SWAP INFO
 SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
 readonly SWAP_FILE
-
-SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s $SWAP_FILE)
+SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s "$SWAP_FILE")
 readonly SWAP_FILE_BYTES
-
 readonly SWAP_FILE_GB=$((SWAP_FILE_BYTES / 1024 / 1024))
-
-LSB_DIST=$( ([ -n "${ID_LIKE}" ] && echo "${ID_LIKE}") || ([ -n "${ID}" ] && echo "${ID}"))
-readonly LSB_DIST
-
-DIST=$(echo "${ID}")
-readonly DIST
-
-UNAME_M="$(uname -m)"
-readonly UNAME_M
-
-UNAME_U="$(uname -s)"
-readonly UNAME_U
 
 # COLORS
 readonly COLOUR_RESET='\e[0m'
@@ -58,6 +41,9 @@ readonly GREEN_LINE=" ${aCOLOUR[0]}───────────────
 readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
 readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
+###############################################################################
+# Trap Ctrl+C to exit gracefully                                              #
+###############################################################################
 trap 'onCtrlC' INT
 onCtrlC() {
     echo -e "${COLOUR_RESET}"
@@ -67,18 +53,6 @@ onCtrlC() {
 ###############################################################################
 # Helpers                                                                     #
 ###############################################################################
-
-#######################################
-# Custom printing function
-# Globals:
-#   None
-# Arguments:
-#   $1 0:OK   1:FAILED  2:INFO  3:NOTICE
-#   message
-# Returns:
-#   None
-#######################################
-
 Show() {
     # OK
     if (($1 == 0)); then
@@ -104,19 +78,6 @@ ColorReset() {
     echo -e "$COLOUR_RESET\c"
 }
 
-# Clear Terminal
-Clear_Term() {
-    # Without an input terminal, there is no point in doing this.
-    [[ -t 0 ]] || return
-
-    # Printing terminal height - 1 newlines seems to be the fastest method that is compatible with all terminal types.
-    lines=$(tput lines) i newlines
-    local lines
-
-    for ((i = 1; i < ${lines% *}; i++)); do newlines+='\n'; done
-    echo -ne "\e[0m$newlines\e[H"
-}
-
 ###############################################################################
 # Install Package Dependencies                                                #
 ###############################################################################
@@ -138,9 +99,9 @@ Upgrade_Package_Resource() {
 
 Install_Depends() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
-        cmd=${DEPEND_COMMANDS[i]}
-        if [[ ! -x $(sudo which "$cmd") ]]; then
-            packageNeeded=${DEPEND_PACKAGES[i]}
+        local cmd=${DEPEND_COMMANDS[i]}
+        if ! command -v "$cmd" &>/dev/null; then
+            local packageNeeded=${DEPEND_PACKAGES[i]}
             Show 2 "Install the necessary dependency: \e[33m$packageNeeded \e[0m"
             GreyStart
             sudo apt-get -y -qq install "$packageNeeded" --no-upgrade
@@ -151,9 +112,9 @@ Install_Depends() {
 
 Check_Dependency_Installation() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
-        cmd=${DEPEND_COMMANDS[i]}
-        if [[ ! -x $(sudo which "$cmd") ]]; then
-            packageNeeded=${DEPEND_PACKAGES[i]}
+        local cmd=${DEPEND_COMMANDS[i]}
+        if ! command -v "$cmd" &>/dev/null; then
+            local packageNeeded=${DEPEND_PACKAGES[i]}
             Show 1 "Dependency \e[33m$packageNeeded \e[0m installation failed, please try again manually!"
             exit 1
         fi
@@ -164,6 +125,7 @@ Check_Dependency_Installation() {
 # Install Docker # https://docs.docker.com/engine/install/ubuntu/             #
 ###############################################################################
 Install_Docker() {
+    # See: https://docs.docker.com/engine/install/ubuntu/
     Show 2 "Add Docker's official GPG key..."
     GreyStart
     sudo install -m 0755 -d /etc/apt/keyrings
@@ -180,8 +142,8 @@ Install_Docker() {
     ColorReset
 
     Show 2 "Install Packages..."
+    Update_Package_Resource
     GreyStart
-    sudo apt-get update -qq
     sudo apt-get -y -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ColorReset
 
@@ -197,11 +159,10 @@ Check_Docker_Install() {
     Show 0 "Docker verify install complete."
 }
 
-
 Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
         sleep 3
-        if [[ ! $(sudo systemctl is-active docker) == "active" ]]; then
+        if [[ $(sudo systemctl is-active docker) != "active" ]]; then
             Show 1 "Docker is not running, try to start"
             sudo systemctl start docker
         else
@@ -214,17 +175,11 @@ Check_Docker_Running() {
 # Welcome Helpers                                                             #
 ###############################################################################
 Get_IPs() {
-    PORT=$(sudo cat ${CASA_CONF_PATH} | grep port | sed 's/port=//')
-    ALL_NIC=$($sudo_cmd ls /sys/class/net/ | grep -v "$(ls /sys/devices/virtual/net/)")
-    for NIC in ${ALL_NIC}; do
-        IP=$($sudo_cmd ifconfig "${NIC}" | grep inet | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}' | sed -e 's/addr://g')
-        if [[ -n $IP ]]; then
-            if [[ "$PORT" -eq "80" ]]; then
-                echo -e "${GREEN_BULLET} http://$IP (${NIC})"
-            else
-                echo -e "${GREEN_BULLET} http://$IP:$PORT (${NIC})"
-            fi
-        fi
+    # List all non-loopback IPv4 addresses for all interfaces
+    local ips
+    ips=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1)
+    for ip in $ips; do
+        echo -e "${GREEN_BULLET} http://$ip"
     done
 }
 
@@ -257,144 +212,63 @@ Welcome_Banner() {
 }
 
 ###############################################################################
-# Swap Size                                                                        #
+# Swap Size                                                                   #
+# See: https://help.ubuntu.com/community/SwapFaq                              #
 ###############################################################################
 Set_Swap_Size() {
     Show 2 "Turn off swap..."
     GreyStart
-    sudo swapoff $SWAP_FILE
+    sudo swapoff "$SWAP_FILE"
     ColorReset
 
     Show 2 "Resize swap in-place..."
     GreyStart
-    sudo time sudo dd if=/dev/zero of=$SWAP_FILE count=$PHYSICAL_MEMORY_GB bs=1G
+    sudo dd if=/dev/zero of="$SWAP_FILE" count="$PHYSICAL_MEMORY_GB" bs=1G
     ColorReset
 
     Show 2 "mkswap $SWAP_FILE..."
     GreyStart
-    sudo mkswap $SWAP_FILE
-    sudo chmod 0600 $SWAP_FILE
+    sudo mkswap "$SWAP_FILE"
+    sudo chmod 0600 "$SWAP_FILE"
     ColorReset
 
     Show 2 "Turn on swap..."
     GreyStart
-    sudo swapon $SWAP_FILE
+    sudo swapon "$SWAP_FILE"
     sudo swapon --show
     ColorReset
     Show 0 "Set swap size complete."
 }
 
 ###############################################################################
-# Digiur Repo                                                                 #
+# Digiur Net                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
-    Show 2 "Start ttyd..."
-    GreyStart
-    sudo systemctl status ttyd.service
-    sudo cp ./digiur-net/etc/ttyd /etc/default/ttyd
-    sudo systemctl restart ttyd.service
-    sudo systemctl status ttyd.service
-    ColorReset
+    # Show 2 "Start ttyd..."
+    # GreyStart
+    # sudo systemctl status ttyd.service
+    # sudo cp ./digiur-net/etc/ttyd /etc/default/ttyd
+    # sudo systemctl restart ttyd.service
+    # sudo systemctl status ttyd.service
+    # ColorReset
 
-    Show 2 "Start alist..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/alist/docker-compose.yml up -d
-    ColorReset
+    # local services=(
+    #     alist audiobookshelf dashy handbrake jellyfin librespeed mealie memos myspeed
+    #     navidrome portainer prowlarr qdirstat radarr romm snapdrop sonarr swing-music
+    #     transmission-plus-gluetun uptime-kuma
+    # )
 
-    Show 2 "Start audiobookshelf..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/audiobookshelf/docker-compose.yml up -d
-    ColorReset
+    local services=(
+        dashy handbrake jellyfin librespeed mealie myspeed portainer
+        prowlarr qdirstat radarr romm snapdrop sonarr transmission-plus-gluetun
+    )
 
-    Show 2 "Start dashy..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/dashy/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start handbrake..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/handbrake/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start jellyfin..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/jellyfin/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start librespeed..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/librespeed/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start mealie..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/mealie/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start memos..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/memos/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start myspeed..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/myspeed/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start navidrome..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/navidrome/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start portainer..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/portainer/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start prowlarr..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/prowlarr/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start qdirstat..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/qdirstat/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start radarr..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/radarr/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start romm..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/romm/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start snapdrop..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/snapdrop/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start sonarr..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/sonarr/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start swing-music..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/swing-music/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start transmission+gluetun..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml up -d
-    ColorReset
-
-    Show 2 "Start uptime-kuma..."
-    GreyStart
-    docker compose -f ./digiur-net/docker/uptime-kuma/docker-compose.yml up -d
-    ColorReset
+    for svc in "${services[@]}"; do
+        Show 2 "Start $svc..."
+        GreyStart
+        docker compose -f "./digiur-net/docker/$svc/docker-compose.yml" up -d
+        ColorReset
+    done
 
     Show 0 "Digiur-net Setup complete."
 }

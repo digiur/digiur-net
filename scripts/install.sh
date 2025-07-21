@@ -2,12 +2,10 @@
 
 LOG_FILE="install_log.txt"
 
-# Function to log messages
 log() {
     echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a $LOG_FILE
 }
 
-# Function to handle errors and exit
 handle_error() {
     log "ERROR: $1. Exiting."
     exit 1
@@ -63,6 +61,27 @@ log "Dependency re-check passed."
 
 Check_Docker_Install || handle_error "Docker re-check failed"
 log "Docker re-check passed."
+
+# Handle Transmission and VPN credentials via .env file
+CRED_FILE="./transmission+gluetun.env"
+if [ ! -f "$CRED_FILE" ]; then
+    handle_error "Credentials file $CRED_FILE not found. Please create it and fill in Transmission and VPN credentials before running the install. See the quickstart instructions."
+fi
+
+source "$CRED_FILE"
+if [ -z "$TRANSMISSION_USER" ] || [ -z "$TRANSMISSION_PASS" ] || [ -z "$VPN_USER" ] || [ -z "$VPN_PASS" ]; then
+    handle_error "Credentials file $CRED_FILE is missing required values. Please edit it and fill in all credentials before running the install."
+fi
+
+TRANSMISSION_COMPOSE="./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml"
+
+# Replace Transmission credentials
+sed -i "s/^\([[:space:]]*USER:\)[[:space:]]*.*/\1 $TRANSMISSION_USER/" "$TRANSMISSION_COMPOSE"
+sed -i "s/^\([[:space:]]*PASS:\)[[:space:]]*.*/\1 $TRANSMISSION_PASS/" "$TRANSMISSION_COMPOSE"
+
+# Replace Gluetun VPN credentials
+sed -i "s/OPENVPN_USER=.*/OPENVPN_USER=$VPN_USER/" "$TRANSMISSION_COMPOSE"
+sed -i "s/OPENVPN_PASSWORD=.*/OPENVPN_PASSWORD=$VPN_PASS/" "$TRANSMISSION_COMPOSE"
 
 Digiur_Net_Setup || handle_error "Failed to set up digiur-net"
 log "Digiur-net setup completed successfully."
