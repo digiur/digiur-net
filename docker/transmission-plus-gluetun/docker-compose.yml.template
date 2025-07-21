@@ -24,8 +24,8 @@ services:
     environment:
       # The following placeholders are replaced with real credentials by install.sh
       # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
-      USER: __TRANSMISSION_USER__
-      PASS: __TRANSMISSION_PASS__
+      USER: {{TRANSMISSION_USER}}
+      PASS: {{TRANSMISSION_PASS}}
       PEERPORT: 60357
       PGID: 1000
       PUID: 1000
@@ -63,8 +63,8 @@ services:
       # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
-      - OPENVPN_USER=__VPN_USER__
-      - OPENVPN_PASSWORD=__VPN_PASS__
+      - OPENVPN_USER={{VPN_USER}}
+      - OPENVPN_PASSWORD={{VPN_PASS}}
       - PORT_FORWARD_ONLY=off
       - VPN_PORT_FORWARDING=off
       - SERVER_COUNTRIES=Switzerland

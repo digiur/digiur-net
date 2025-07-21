@@ -73,15 +73,15 @@ if [ -z "$TRANSMISSION_USER" ] || [ -z "$TRANSMISSION_PASS" ] || [ -z "$VPN_USER
     handle_error "Credentials file $CRED_FILE is missing required values. Please edit it and fill in all credentials before running the install."
 fi
 
+TRANSMISSION_TEMPLATE="./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml.template"
 TRANSMISSION_COMPOSE="./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml"
 
-# Replace Transmission credentials
-sed -i "s/^\([[:space:]]*USER:\)[[:space:]]*.*/\1 $TRANSMISSION_USER/" "$TRANSMISSION_COMPOSE"
-sed -i "s/^\([[:space:]]*PASS:\)[[:space:]]*.*/\1 $TRANSMISSION_PASS/" "$TRANSMISSION_COMPOSE"
+cp "$TRANSMISSION_TEMPLATE" "$TRANSMISSION_COMPOSE"
 
-# Replace Gluetun VPN credentials
-sed -i "s/OPENVPN_USER=.*/OPENVPN_USER=$VPN_USER/" "$TRANSMISSION_COMPOSE"
-sed -i "s/OPENVPN_PASSWORD=.*/OPENVPN_PASSWORD=$VPN_PASS/" "$TRANSMISSION_COMPOSE"
+sed -i "s|{{TRANSMISSION_USER}}|$TRANSMISSION_USER|g" "$TRANSMISSION_COMPOSE"
+sed -i "s|{{TRANSMISSION_PASS}}|$TRANSMISSION_PASS|g" "$TRANSMISSION_COMPOSE"
+sed -i "s|{{VPN_USER}}|$VPN_USER|g" "$TRANSMISSION_COMPOSE"
+sed -i "s|{{VPN_PASS}}|$VPN_PASS|g" "$TRANSMISSION_COMPOSE"
 
 # Update dashboard IPs
 log "Injecting host IP into Dashy config..."
