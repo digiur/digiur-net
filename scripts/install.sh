@@ -83,6 +83,22 @@ sed -i "s/^\([[:space:]]*PASS:\)[[:space:]]*.*/\1 $TRANSMISSION_PASS/" "$TRANSMI
 sed -i "s/OPENVPN_USER=.*/OPENVPN_USER=$VPN_USER/" "$TRANSMISSION_COMPOSE"
 sed -i "s/OPENVPN_PASSWORD=.*/OPENVPN_PASSWORD=$VPN_PASS/" "$TRANSMISSION_COMPOSE"
 
+# Update dashboard IPs
+log "Injecting host IP into Dashy config..."
+
+HOST_IP=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
+DASHY_TEMPLATE="./digiur-net/docker/dashy/app/user-data/conf.yml.template"
+DASHY_CONF="./digiur-net/docker/dashy/app/user-data/conf.yml"
+
+if [ -f "$DASHY_TEMPLATE" ]; then
+    cp "$DASHY_TEMPLATE" "$DASHY_CONF"
+    sed -i "s|{{HOST_IP}}|$HOST_IP|g" "$DASHY_CONF"
+    log "Dashy conf generated with IP: $HOST_IP"
+else
+    handle_error "Template file $DASHY_TEMPLATE not found"
+fi
+
+# Start containers
 Digiur_Net_Setup || handle_error "Failed to set up digiur-net"
 log "Digiur-net setup completed successfully."
 

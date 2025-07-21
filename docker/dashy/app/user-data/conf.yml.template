@@ -52,78 +52,78 @@ sections:
     description: Digiur-Net git repository hosted on github
     url: https://github.com/digiur/digiur-net
 
-  - title: Alist
-    description: File system explorer
-    url: 0.0.0.0:5244
+  # - title: Alist
+  #   description: File system explorer
+  #   url: 0.0.0.0:5244
 
-  - title: AudioBookshelf
-    description: File system explorer
-    url: 0.0.0.0:13378
+  # - title: AudioBookshelf
+  #   description: File system explorer
+  #   url: 0.0.0.0:13378
 
   - title: Handbrake
     description: Video file transcoder (Advanced)
-    url: 0.0.0.0:5800
+    url: http://{{HOST_IP}}:5800
 
   - title: Jellyfin
     description: File system explorer
-    url: 0.0.0.0:8096
+    url: http://{{HOST_IP}}:8096
 
   - title: Local Speed (LibreSpeed)
     description: Speedtest From You To The Server
-    url: 0.0.0.0:81
+    url: http://{{HOST_IP}}:81
 
   - title: Mealie
     description: Recipe Manager
-    url: 0.0.0.0:9925
+    url: http://{{HOST_IP}}:9925
 
-  - title: Memos
-    description: Simple Note Taking
-    url: 0.0.0.0:5230
+  # - title: Memos
+  #   description: Simple Note Taking
+  #   url: 0.0.0.0:5230
 
   - title: Web Speed (MySpeed)
     description: Speedtest From The Server To The Internet
-    url: 0.0.0.0:13378
+    url: http://{{HOST_IP}}:13378
 
-  - title: Navidrome
-    description: Music Streamer
-    url: 0.0.0.0:4533
+  # - title: Navidrome
+  #   description: Music Streamer
+  #   url: 0.0.0.0:4533
 
   - title: Portainer
-    description: Docker Manager (Advanced)
-    url: 0.0.0.0:9000
+    description: Docker Manager
+    url: http://{{HOST_IP}}:9000
 
   - title: Prowl-arr!
     description: Torrent Indexer Search
-    url: 0.0.0.0:9696
+    url: http://{{HOST_IP}}:9696
 
   - title: QDirStat
     description: Disk usage analyzer
-    url: 0.0.0.0:3000
+    url: http://{{HOST_IP}}:3000
 
   - title: Rad-arr!
     description: Torrent Movie Search
-    url: 0.0.0.0:7878
+    url: http://{{HOST_IP}}:7878
 
   - title: RomM
     description: Retro Console Emulators
-    url: 0.0.0.0:1337
+    url: http://{{HOST_IP}}:1337
 
   - title: SnapDrop
-    description: Share files between machines on the local network
-    url: 0.0.0.0:89
+    description: Share files across local network
+    url: http://{{HOST_IP}}:89
 
   - title: Son-arr!
     description: Torrent TV Search
-    url: 0.0.0.0:8989
+    url: http://{{HOST_IP}}:8989
 
-  - title: Swing Music
-    description: Music Streamer
-    url: 0.0.0.0:1970
+  # - title: Swing Music
+  #   description: Music Streamer
+  #   url: 0.0.0.0:1970
 
-  - title: Transmission Plus Gluetun
+  - title: Transmission + Gluetun
     description: Torrent Downloader
-    url: 0.0.0.0:9091
+    url: http://{{HOST_IP}}:9091
 
-  - title: Uptime Kuma
-    description: File system explorer
-    url: 0.0.0.0:3001
+  # - title: Uptime Kuma
+  #   description: File system explorer
+  #   url: 0.0.0.0:3001
