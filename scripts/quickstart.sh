@@ -7,6 +7,20 @@ log() {
     echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a $LOG_FILE
 }
 
+# Clone the 'digiur-net' repository
+REPO_DIR="digiur-net"
+if [ -d "$REPO_DIR" ]; then
+    log "'$REPO_DIR' already exists. Skipping git clone."
+else
+    log "Cloning 'digiur-net' repository from GitHub..."
+    if git clone https://github.com/digiur/digiur-net.git; then
+        log "'digiur-net' repository cloned successfully."
+    else
+        log "Failed to clone 'digiur-net' repository."
+        exit 1
+    fi
+fi
+
 # Check if user is already in 'docker' group
 if groups $USER | grep &>/dev/null '\bdocker\b'; then
     log "User '$USER' is already in the 'docker' group. Skipping group setup."
@@ -40,20 +54,6 @@ else
     log "Find your credentials here: https://protonvpn.com/support/vpn-login (Use your OpenVPN / IKEv2 username and password)"
     log "Please log out and log back in to apply the group change, then rerun this script to continue."
     exit 0
-fi
-
-# Clone the 'digiur-net' repository
-REPO_DIR="digiur-net"
-if [ -d "$REPO_DIR" ]; then
-    log "'$REPO_DIR' already exists. Skipping git clone."
-else
-    log "Cloning 'digiur-net' repository from GitHub..."
-    if git clone https://github.com/digiur/digiur-net.git; then
-        log "'digiur-net' repository cloned successfully."
-    else
-        log "Failed to clone 'digiur-net' repository."
-        exit 1
-    fi
 fi
 
 # Make the 'install.sh' script executable
