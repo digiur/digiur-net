@@ -152,14 +152,7 @@ Check_Docker_Running() {
 ###############################################################################
 # Welcome Helpers                                                             #
 ###############################################################################
-echo_ips() {
-    # List all non-loopback IPv4 addresses for all interfaces
-    local ips
-    ips=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1)
-    for ip in $ips; do
-        echo -e "${GREEN_BULLET} http://$ip"
-    done
-}
+readonly IP=$(ip route get 1.1.1.1 | awk '/src/ {print $7}')
 
 Welcome_Logo() {
     echo '
@@ -179,7 +172,7 @@ Welcome_Banner() {
     echo -e "${GREEN_LINE}${aCOLOUR[1]}"
     echo -e " DigiurOS ${COLOUR_RESET} is running at${COLOUR_RESET}${GREEN_SEPARATOR}"
     echo -e "${GREEN_LINE}"
-    echo_ips
+    echo -e "${GREEN_BULLET} http://$IP"
     echo -e " Open your browser and visit the above address."
     echo -e "${GREEN_LINE}"
     echo -e ""
@@ -214,7 +207,7 @@ readonly TARGET_SWAP_GB
 
 Set_Swap_Size() {
     if (( SWAP_FILE_GB >= TARGET_SWAP_GB )); then
-        show 3 "Swap file is already ${SWAP_FILE_GB}GB, which is >= target ${TARGET_SWAP_GB}GB. Skipping resize."
+        show 0 "Swap file is already ${SWAP_FILE_GB}GB, which is >= target ${TARGET_SWAP_GB}GB. Skipping resize."
         return
     fi
 
