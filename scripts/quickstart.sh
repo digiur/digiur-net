@@ -13,7 +13,7 @@ if [ -d "$REPO_DIR" ]; then
     log "'$REPO_DIR' already exists. Skipping git clone."
 else
     log "Cloning 'digiur-net' repository from GitHub..."
-    if git clone https://github.com/digiur/digiur-net.git; then
+    if git clone https://github.com/digiur/digiur-net.git "$REPO_DIR"; then
         log "'digiur-net' repository cloned successfully."
     else
         log "Failed to clone 'digiur-net' repository."
@@ -50,14 +50,14 @@ else
 
     # Inform user to log out/in and exit
     log "Group change will be applied after logging out and back in."
-    log "Before running this script again, edit the file ./transmission+gluetun.env and fill in your Transmission and VPN credentials."
-    log "Find your credentials here: https://protonvpn.com/support/vpn-login (Use your OpenVPN / IKEv2 username and password)"
     log "Please log out and log back in to apply the group change, then rerun this script to continue."
+    log "Before running this script again, edit the file ./digiur-net/transmission+gluetun.env and fill in your Transmission and VPN credentials."
+    log "Find your credentials here: https://protonvpn.com/support/vpn-login (Use your OpenVPN / IKEv2 username and password)"
     exit 0
 fi
 
 # Make the 'install.sh' script executable
-INSTALL_SCRIPT="./digiur-net/scripts/install.sh"
+INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
 log "Making '$INSTALL_SCRIPT' executable..."
 if [ -f "$INSTALL_SCRIPT" ]; then
     if chmod +x "$INSTALL_SCRIPT"; then
@@ -71,9 +71,8 @@ else
     exit 1
 fi
 
-# Run the 'install.sh' script
 log "Running '$INSTALL_SCRIPT'..."
-if $INSTALL_SCRIPT; then
+if (cd "$REPO_DIR" && ./scripts/install.sh); then
     log "'$INSTALL_SCRIPT' executed successfully."
 else
     log "Failed to execute '$INSTALL_SCRIPT'. Check the log for details."

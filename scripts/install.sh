@@ -1,84 +1,63 @@
 #!/usr/bin/bash
 
-LOG_FILE="install_log.txt"
+source ./scripts/source.sh
 
-log() {
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a $LOG_FILE
-}
+Welcome_Logo || show 1 "Failed to display welcome logo"
 
-handle_error() {
-    log "ERROR: $1. Exiting."
-    exit 1
-}
+# Install Start
+show_time
+show 2 "*** INSTALL process start! ***"
 
-# Check if source.sh exists and source it
-log "Sourcing 'source.sh'..."
-if [ -f "./digiur-net/scripts/source.sh" ]; then
-    source ./digiur-net/scripts/source.sh || handle_error "Failed to source 'source.sh'"
-    log "'source.sh' sourced successfully."
-else
-    handle_error "'source.sh' not found."
-fi
+show 2 "Step 0: Set swap size"
+Set_Swap_Size || show 1 "Failed to set swap size"
+show 0 "Swap size set successfully..."
 
-# Welcome Logo
-log "Displaying welcome logo..."
-Welcome_Logo || handle_error "Failed to display welcome logo"
-log "Welcome logo displayed."
+# Step 1: Install dependencies
+show_time
+show 2 "Step 1: Instal dependencies"
+Update_Package_Resource || show 1 "Failed to update package resource"
+show 0 "Package resource updated..."
 
-log "INSTALL process started..."
+Install_Depends || show 1 "Failed to install dependencies"
+show 0 "Dependencies installed..."
 
-# Step 0: Set Swap Size
-log "Step 0: Setting swap size..."
-Set_Swap_Size || handle_error "Failed to set swap size"
-log "Swap size set successfully."
+Check_Dependency_Installation || show 1 "Dependency installation check failed"
+show 0 "Dependency installation check passed..."
 
-# Step 1: Install Dependencies
-log "Step 1: Installing dependencies..."
-Update_Package_Resource || handle_error "Failed to update package resource"
-log "Package resource updated."
+# Step 2: Install Docker
+show_time
+show 2 "Step 2: Install Docker"
+Install_Docker || show 1 "Failed to install Docker"
+show 0 "Docker installed..."
 
-Install_Depends || handle_error "Failed to install dependencies"
-log "Dependencies installed."
+Check_Docker_Install || show 1 "Docker installation check failed"
+show 0 "Docker installation check passed...."
 
-Check_Dependency_Installation || handle_error "Dependency installation check failed"
-log "Dependency installation check passed."
+# Step 3: Upgrade package resource and re-check dependencies
+show_time
+show 2 "Step 3: Final Dependency Check"
+Upgrade_Package_Resource || show 1 "Failed to upgrade package resource"
+show 0 "Package resource upgraded..."
 
-# Step 2: Check and Install Docker
-log "Step 2: Checking and installing Docker..."
-Install_Docker || handle_error "Failed to install Docker"
-log "Docker installed."
+Check_Dependency_Installation || show 1 "Dependency re-check failed"
+show 0 "Dependency re-check passed..."
 
-Check_Docker_Install || handle_error "Docker installation check failed"
-log "Docker installation check passed."
+Check_Docker_Install || show 1 "Docker re-check failed"
+show 0 "Docker re-check passed..."
 
-# Step 3: Digiur-net Setup
-log "Step 3: Setting up digiur-net..."
-Upgrade_Package_Resource || handle_error "Failed to upgrade package resource"
-log "Package resource upgraded."
+# Step 4: Set up digiur-net
+show_time
+show 2 "Step 4: Set up digiur-net"
+Handle_Transmission_Creds || show 1 "Failed to handle Transmission credentials"
+show 0 "Transmission credentials handled..."
 
-Check_Dependency_Installation || handle_error "Dependency re-check failed"
-log "Dependency re-check passed."
+Update_Dashy_IPs || show 1 "Failed to update Dashy IPs"
+show 0 "Injected host IP into Dashy config..."
 
-Check_Docker_Install || handle_error "Docker re-check failed"
-log "Docker re-check passed."
+Digiur_Net_Setup || show 1 "Failed to set up digiur-net"
+show 0 "Digiur-net setup completed successfully..."
 
-# Handle Transmission and VPN credentials via .env file
-Handle_Transmission_Creds || handle_error "Failed to handle Transmission credentials"
-log "Transmission credentials handled."
+Welcome_Banner || show 1 "Failed to display welcome banner"
 
-# Update dashboard IPs
-Update_Dashy_IPs || handle_error "Failed to update Dashy IPs"
-log "Injected host IP into Dashy config..."
-
-# Start containers
-Digiur_Net_Setup || handle_error "Failed to set up digiur-net"
-log "Digiur-net setup completed successfully."
-
-# Step 4: Clear terminal and show the welcome banner
-log "Step 4: Clearing terminal and showing welcome banner..."
-clear || handle_error "Failed to clear the terminal"
-
-Welcome_Banner || handle_error "Failed to display welcome banner"
-log "Welcome banner displayed successfully."
-
-log "INSTALL process completed successfully."
+show 2 "*** INSTALL process completed successfully! ***"
+show_time

@@ -41,6 +41,8 @@ readonly GREEN_LINE=" ${aCOLOUR[0]}───────────────
 readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
 readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
+LOG_FILE="install_log.txt"
+
 ###############################################################################
 # Trap Ctrl+C to exit gracefully                                              #
 ###############################################################################
@@ -56,18 +58,22 @@ onCtrlC() {
 Show() {
     # OK
     if (($1 == 0)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     # FAILED
     elif (($1 == 1)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
         exit 1
     # INFO
     elif (($1 == 2)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]} INFO $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]} INFO $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     # NOTICE
     elif (($1 == 3)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}NOTICE$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2"
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}NOTICE$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     fi
+}
+
+show_time() {
+    show 2 "$(date +"%Y-%m-%d %H:%M:%S")" 
 }
 
 GreyStart() {
@@ -86,7 +92,6 @@ Update_Package_Resource() {
     GreyStart
     sudo apt-get update -qq
     ColorReset
-    Show 0 "Update package manager complete."
 }
 
 Upgrade_Package_Resource() {
@@ -94,7 +99,6 @@ Upgrade_Package_Resource() {
     GreyStart
     sudo apt-get upgrade -qq
     ColorReset
-    Show 0 "Upgrade package manager complete."
 }
 
 Install_Depends() {
@@ -146,8 +150,6 @@ Install_Docker() {
     GreyStart
     sudo apt-get -y -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ColorReset
-
-    Show 0 "Docker install complete."
 }
 
 Check_Docker_Install() {
@@ -156,14 +158,13 @@ Check_Docker_Install() {
     Check_Docker_Running
     sudo docker run hello-world
     ColorReset
-    Show 0 "Docker verify install complete."
 }
 
 Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
         sleep 3
         if [[ $(sudo systemctl is-active docker) != "active" ]]; then
-            Show 1 "Docker is not running, try to start"
+            Show 4 "Docker is not running, try to start"
             sudo systemctl start docker
         else
             break
@@ -174,7 +175,7 @@ Check_Docker_Running() {
 ###############################################################################
 # Welcome Helpers                                                             #
 ###############################################################################
-Get_IPs() {
+echo_ips() {
     # List all non-loopback IPv4 addresses for all interfaces
     local ips
     ips=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1)
@@ -201,7 +202,7 @@ Welcome_Banner() {
     echo -e "${GREEN_LINE}${aCOLOUR[1]}"
     echo -e " DigiurOS ${COLOUR_RESET} is running at${COLOUR_RESET}${GREEN_SEPARATOR}"
     echo -e "${GREEN_LINE}"
-    Get_IPs
+    echo_ips
     echo -e " Open your browser and visit the above address."
     echo -e "${GREEN_LINE}"
     echo -e ""
@@ -237,7 +238,6 @@ Set_Swap_Size() {
     sudo swapon "$SWAP_FILE"
     sudo swapon --show
     ColorReset
-    Show 0 "Set swap size complete."
 }
 
 ###############################################################################
@@ -247,7 +247,7 @@ Digiur_Net_Setup() {
     # Show 2 "Start ttyd..."
     # GreyStart
     # sudo systemctl status ttyd.service
-    # sudo cp ./digiur-net/etc/ttyd /etc/default/ttyd
+    # sudo cp ./etc/ttyd /etc/default/ttyd
     # sudo systemctl restart ttyd.service
     # sudo systemctl status ttyd.service
     # ColorReset
@@ -266,26 +266,25 @@ Digiur_Net_Setup() {
     for svc in "${services[@]}"; do
         Show 2 "Start $svc..."
         GreyStart
-        docker compose -f "./digiur-net/docker/$svc/docker-compose.yml" up -d
+        docker compose -f "./docker/$svc/docker-compose.yml" up -d
         ColorReset
     done
-
-    Show 0 "Digiur-net Setup complete."
 }
 
 Handle_Transmission_Creds() {
+    show 2 "Handling Transmission and VPN credentials..."
     CRED_FILE="./transmission+gluetun.env"
     if [ ! -f "$CRED_FILE" ]; then
-        handle_error "Credentials file $CRED_FILE not found. Please create it and fill in Transmission and VPN credentials before running the install. See the quickstart instructions."
+        show 1 "Credentials file $CRED_FILE not found. Please create it and fill in Transmission and VPN credentials before running the install. See the quickstart instructions."
     fi
 
     source "$CRED_FILE"
     if [ -z "$TRANSMISSION_USER" ] || [ -z "$TRANSMISSION_PASS" ] || [ -z "$VPN_USER" ] || [ -z "$VPN_PASS" ]; then
-        handle_error "Credentials file $CRED_FILE is missing required values. Please edit it and fill in all credentials before running the install."
+        show 1 "Credentials file $CRED_FILE is missing required values. Please edit it and fill in all credentials before running the install."
     fi
 
-    TRANSMISSION_TEMPLATE="./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml.template"
-    TRANSMISSION_COMPOSE="./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml"
+    TRANSMISSION_TEMPLATE="./docker/transmission-plus-gluetun/docker-compose.yml.template"
+    TRANSMISSION_COMPOSE="./docker/transmission-plus-gluetun/docker-compose.yml"
 
     cp "$TRANSMISSION_TEMPLATE" "$TRANSMISSION_COMPOSE"
 
@@ -297,14 +296,16 @@ Handle_Transmission_Creds() {
 
 Handle_Dashy_IP_Config() {
     HOST_IP=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
-    DASHY_TEMPLATE="./digiur-net/docker/dashy/app/user-data/conf.yml.template"
-    DASHY_CONF="./digiur-net/docker/dashy/app/user-data/conf.yml"
+    DASHY_TEMPLATE="./docker/dashy/app/user-data/conf.yml.template"
+    DASHY_CONF="./docker/dashy/app/user-data/conf.yml"
+
+    show 2 "Updating Dashy IP configuration with IP: $HOST_IP..."
 
     if [ -f "$DASHY_TEMPLATE" ]; then
         cp "$DASHY_TEMPLATE" "$DASHY_CONF"
         sed -i "s|{{HOST_IP}}|$HOST_IP|g" "$DASHY_CONF"
         log "Dashy conf generated with IP: $HOST_IP"
     else
-        handle_error "Template file $DASHY_TEMPLATE not found"
+        show 1 "Template file $DASHY_TEMPLATE not found"
     fi
 }
