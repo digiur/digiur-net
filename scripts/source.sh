@@ -57,6 +57,39 @@ ColorReset() {
 }
 
 ###############################################################################
+# Welcome Helpers                                                             #
+###############################################################################
+readonly IP=$(ip route get 1.1.1.1 | awk '/src/ {print $7}')
+
+Welcome_Logo() {
+    echo '
+     ____                          __    _____ 
+    |  __ \                      / __ \ / ____|
+    | |  \ \ _   _   _ _  _  __ | |  | | (___  
+    | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
+    | |__/ /| | (_| | | || | |  | |__| |____) |
+    |_____/ |_|\_  /|_|\_,_|_|   \____/|_____/ 
+             |____/                            
+'
+}
+
+Welcome_Banner() {
+    Welcome_Logo
+    echo "INSTALL COMPLETE!"
+    echo -e "${GREEN_LINE}${aCOLOUR[1]}"
+    echo -e " DigiurOS ${COLOUR_RESET} is running at${COLOUR_RESET}${GREEN_SEPARATOR}"
+    echo -e "${GREEN_LINE}"
+    echo -e "${GREEN_BULLET} http://$IP"
+    echo -e " Open your browser and visit the above address."
+    echo -e "${GREEN_LINE}"
+    echo -e ""
+    echo -e " ${aCOLOUR[2]}DigiurOS on Github  : https://github.com/digiur/digiur-net"
+    echo -e " ${aCOLOUR[2]}DigiurOS Discord    : https://discord.gg/CBFae73u"
+    echo -e ""
+    echo -e "${COLOUR_RESET}"
+}
+
+###############################################################################
 # Install Package Dependencies                                                #
 ###############################################################################
 readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
@@ -147,39 +180,6 @@ Check_Docker_Running() {
             break
         fi
     done
-}
-
-###############################################################################
-# Welcome Helpers                                                             #
-###############################################################################
-readonly IP=$(ip route get 1.1.1.1 | awk '/src/ {print $7}')
-
-Welcome_Logo() {
-    echo '
-     ____                          __    _____ 
-    |  __ \                      / __ \ / ____|
-    | |  \ \ _   _   _ _  _  __ | |  | | (___  
-    | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
-    | |__/ /| | (_| | | || | |  | |__| |____) |
-    |_____/ |_|\_  /|_|\_,_|_|   \____/|_____/ 
-             |____/                            
-'
-}
-
-Welcome_Banner() {
-    Welcome_Logo
-    echo "INSTALL COMPLETE!"
-    echo -e "${GREEN_LINE}${aCOLOUR[1]}"
-    echo -e " DigiurOS ${COLOUR_RESET} is running at${COLOUR_RESET}${GREEN_SEPARATOR}"
-    echo -e "${GREEN_LINE}"
-    echo -e "${GREEN_BULLET} http://$IP"
-    echo -e " Open your browser and visit the above address."
-    echo -e "${GREEN_LINE}"
-    echo -e ""
-    echo -e " ${aCOLOUR[2]}DigiurOS on Github  : https://github.com/digiur/digiur-net"
-    echo -e " ${aCOLOUR[2]}DigiurOS Discord    : https://discord.gg/CBFae73u"
-    echo -e ""
-    echo -e "${COLOUR_RESET}"
 }
 
 ###############################################################################
