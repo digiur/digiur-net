@@ -260,7 +260,7 @@ Digiur_Net_Setup() {
 
     local services=(
         dashy handbrake jellyfin librespeed mealie myspeed portainer
-        prowlarr qdirstat radarr romm snapdrop sonarr transmission-plus-gluetun
+        prowlarr qdirstat radarr romm sonarr transmission-plus-gluetun
     )
 
     for svc in "${services[@]}"; do
