@@ -11,7 +11,7 @@ name: transmission-plus-gluetun
 services:
   transmissionplus:
     image: linuxserver/transmission
-    container_name: transmissionplus
+    container_name: transmission
 
     # All Transmission network traffic is routed through the Gluetun VPN container.
     # This is enforced by network_mode: "service:gluetun"
@@ -33,6 +33,8 @@ services:
 
     restart: unless-stopped
 
+  # Test Gluetun connection by checking the public IP:
+  # docker run --rm --network=container:gluetun alpine:3.20 sh -c "apk add wget && wget -qO- https://ipinfo.io"
   gluetun:
     image: qmcgaw/gluetun
     container_name: gluetun
