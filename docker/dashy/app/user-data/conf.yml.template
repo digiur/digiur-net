@@ -108,9 +108,9 @@ sections:
     description: Retro Console Emulators
     url: http://{{HOST_IP}}:1337
 
-  - title: SnapDrop
-    description: Share files across local network
-    url: http://{{HOST_IP}}:89
+  # - title: SnapDrop
+  #   description: Share files across local network
+  #   url: http://{{HOST_IP}}:89
 
   - title: Son-arr!
     description: Torrent TV Search
