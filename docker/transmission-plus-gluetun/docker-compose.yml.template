@@ -65,8 +65,8 @@ services:
       - VPN_TYPE=openvpn
       - OPENVPN_USER={{VPN_USER}}
       - OPENVPN_PASSWORD={{VPN_PASS}}
-      - PORT_FORWARD_ONLY=off
-      - VPN_PORT_FORWARDING=off
+      - PORT_FORWARD_ONLY=on
+      - VPN_PORT_FORWARDING=on
       - SERVER_COUNTRIES=Switzerland
       - TZ=America/Denver
 
