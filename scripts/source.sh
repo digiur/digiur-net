@@ -55,7 +55,7 @@ onCtrlC() {
 ###############################################################################
 # Helpers                                                                     #
 ###############################################################################
-Show() {
+show() {
     # OK
     if (($1 == 0)); then
         echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
@@ -88,14 +88,14 @@ ColorReset() {
 # Install Package Dependencies                                                #
 ###############################################################################
 Update_Package_Resource() {
-    Show 2 "Updating package manager..."
+    show 2 "Updating package manager..."
     GreyStart
     sudo apt-get update -qq
     ColorReset
 }
 
 Upgrade_Package_Resource() {
-    Show 2 "Upgrading package manager..."
+    show 2 "Upgrading package manager..."
     GreyStart
     sudo apt-get upgrade -qq
     ColorReset
@@ -106,7 +106,7 @@ Install_Depends() {
         local cmd=${DEPEND_COMMANDS[i]}
         if ! command -v "$cmd" &>/dev/null; then
             local packageNeeded=${DEPEND_PACKAGES[i]}
-            Show 2 "Install the necessary dependency: \e[33m$packageNeeded \e[0m"
+            show 2 "Install the necessary dependency: \e[33m$packageNeeded \e[0m"
             GreyStart
             sudo apt-get -y -qq install "$packageNeeded" --no-upgrade
             ColorReset
@@ -119,7 +119,7 @@ Check_Dependency_Installation() {
         local cmd=${DEPEND_COMMANDS[i]}
         if ! command -v "$cmd" &>/dev/null; then
             local packageNeeded=${DEPEND_PACKAGES[i]}
-            Show 1 "Dependency \e[33m$packageNeeded \e[0m installation failed, please try again manually!"
+            show 1 "Dependency \e[33m$packageNeeded \e[0m installation failed, please try again manually!"
             exit 1
         fi
     done
@@ -130,14 +130,14 @@ Check_Dependency_Installation() {
 ###############################################################################
 Install_Docker() {
     # See: https://docs.docker.com/engine/install/ubuntu/
-    Show 2 "Add Docker's official GPG key..."
+    show 2 "Add Docker's official GPG key..."
     GreyStart
     sudo install -m 0755 -d /etc/apt/keyrings
     sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
     sudo chmod a+r /etc/apt/keyrings/docker.asc
     ColorReset
 
-    Show 2 "Add the repository to Apt sources..."
+    show 2 "Add the repository to Apt sources..."
     GreyStart
     echo \
         "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
@@ -145,7 +145,7 @@ Install_Docker() {
         sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
     ColorReset
 
-    Show 2 "Install Packages..."
+    show 2 "Install Packages..."
     Update_Package_Resource
     GreyStart
     sudo apt-get -y -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
@@ -153,7 +153,7 @@ Install_Docker() {
 }
 
 Check_Docker_Install() {
-    Show 2 "Verify install..."
+    show 2 "Verify install..."
     GreyStart
     Check_Docker_Running
     sudo docker run hello-world
@@ -164,7 +164,7 @@ Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
         sleep 3
         if [[ $(sudo systemctl is-active docker) != "active" ]]; then
-            Show 4 "Docker is not running, try to start"
+            show 4 "Docker is not running, try to start"
             sudo systemctl start docker
         else
             break
@@ -217,23 +217,23 @@ Welcome_Banner() {
 # See: https://help.ubuntu.com/community/SwapFaq                              #
 ###############################################################################
 Set_Swap_Size() {
-    Show 2 "Turn off swap..."
+    show 2 "Turn off swap..."
     GreyStart
     sudo swapoff "$SWAP_FILE"
     ColorReset
 
-    Show 2 "Resize swap in-place..."
+    show 2 "Resize swap in-place..."
     GreyStart
     sudo dd if=/dev/zero of="$SWAP_FILE" count="$PHYSICAL_MEMORY_GB" bs=1G
     ColorReset
 
-    Show 2 "mkswap $SWAP_FILE..."
+    show 2 "mkswap $SWAP_FILE..."
     GreyStart
     sudo mkswap "$SWAP_FILE"
     sudo chmod 0600 "$SWAP_FILE"
     ColorReset
 
-    Show 2 "Turn on swap..."
+    show 2 "Turn on swap..."
     GreyStart
     sudo swapon "$SWAP_FILE"
     sudo swapon --show
@@ -244,7 +244,7 @@ Set_Swap_Size() {
 # Digiur Net                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
-    # Show 2 "Start ttyd..."
+    # show 2 "Start ttyd..."
     # GreyStart
     # sudo systemctl status ttyd.service
     # sudo cp ./etc/ttyd /etc/default/ttyd
@@ -264,7 +264,7 @@ Digiur_Net_Setup() {
     )
 
     for svc in "${services[@]}"; do
-        Show 2 "Start $svc..."
+        show 2 "Start $svc..."
         GreyStart
         docker compose -f "./docker/$svc/docker-compose.yml" up -d
         ColorReset
