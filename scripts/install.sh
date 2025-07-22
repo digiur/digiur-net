@@ -51,7 +51,7 @@ show 2 "Step 4: Set up digiur-net"
 Handle_Transmission_Creds || show 1 "Failed to handle Transmission credentials"
 show 0 "Transmission credentials handled..."
 
-Update_Dashy_IPs || show 1 "Failed to update Dashy IPs"
+Handle_Dashy_IP_Config || show 1 "Failed to update Dashy IPs"
 show 0 "Injected host IP into Dashy config..."
 
 Digiur_Net_Setup || show 1 "Failed to set up digiur-net"
