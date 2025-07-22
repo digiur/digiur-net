@@ -193,37 +193,48 @@ Welcome_Banner() {
 # Swap Size                                                                   #
 # See: https://help.ubuntu.com/community/SwapFaq                              #
 ###############################################################################
-PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
-readonly PHYSICAL_MEMORY_GB
+readonly PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
 
-FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
-readonly FREE_DISK_BYTES
+readonly FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
 readonly FREE_DISK_GB=$((FREE_DISK_BYTES / 1024 / 1024))
 
-SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
-readonly SWAP_FILE
-SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s "$SWAP_FILE")
-readonly SWAP_FILE_BYTES
+readonly SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
+readonly SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s "$SWAP_FILE")
 readonly SWAP_FILE_GB=$((SWAP_FILE_BYTES / 1024 / 1024))
 
+readonly TARGET_SWAP_BY_DISK=$((FREE_DISK_GB / 4))
+
+# Use smaller of the two
+if (( PHYSICAL_MEMORY_GB < TARGET_SWAP_BY_DISK )); then
+    TARGET_SWAP_GB=$PHYSICAL_MEMORY_GB
+else
+    TARGET_SWAP_GB=$TARGET_SWAP_BY_DISK
+fi
+readonly TARGET_SWAP_GB
+
 Set_Swap_Size() {
-    show 2 "Turn off swap..."
+    if (( SWAP_FILE_GB >= TARGET_SWAP_GB )); then
+        show 3 "Swap file is already ${SWAP_FILE_GB}GB, which is >= target ${TARGET_SWAP_GB}GB. Skipping resize."
+        return
+    fi
+
+    show 2 "Turning off swap..."
     GreyStart
     sudo swapoff "$SWAP_FILE"
     ColorReset
 
-    show 2 "Resize swap in-place..."
+    show 2 "Resizing swap to ${TARGET_SWAP_GB}GB in-place..."
     GreyStart
-    sudo dd if=/dev/zero of="$SWAP_FILE" count="$PHYSICAL_MEMORY_GB" bs=1G
+    sudo dd if=/dev/zero of="$SWAP_FILE" count="$TARGET_SWAP_GB" bs=1G status=progress
     ColorReset
 
-    show 2 "mkswap $SWAP_FILE..."
+    show 2 "Creating new swap space on $SWAP_FILE..."
     GreyStart
     sudo mkswap "$SWAP_FILE"
     sudo chmod 0600 "$SWAP_FILE"
     ColorReset
 
-    show 2 "Turn on swap..."
+    show 2 "Turning on swap..."
     GreyStart
     sudo swapon "$SWAP_FILE"
     sudo swapon --show
