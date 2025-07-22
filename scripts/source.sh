@@ -90,14 +90,14 @@ ColorReset() {
 Update_Package_Resource() {
     show 2 "Updating package manager..."
     GreyStart
-    sudo apt-get update
+    sudo apt-get update -y
     ColorReset
 }
 
 Upgrade_Package_Resource() {
     show 2 "Upgrading package manager..."
     GreyStart
-    sudo apt-get upgrade
+    sudo apt-get upgrade -y
     ColorReset
 }
 
