@@ -1,33 +1,12 @@
 #!/usr/bin/bash
+###############################################################################
+# Shell and Logging Helpers                                                   #
+###############################################################################
 echo -e "\e[0m\c"
 set -e
 
-source /etc/os-release
+LOG_FILE="install_log.txt"
 
-# SYSTEM REQUIREMENTS
-readonly MINIMUM_DOCKER_VERSION="20"
-# readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
-# readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
-readonly DEPEND_PACKAGES=('btop' 'curl' 'samba' 'net-tools' 'ca-certificates')
-readonly DEPEND_COMMANDS=('btop' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
-
-# MEMORY INFO
-PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
-readonly PHYSICAL_MEMORY_GB
-
-# DISK INFO
-FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
-readonly FREE_DISK_BYTES
-readonly FREE_DISK_GB=$((FREE_DISK_BYTES / 1024 / 1024))
-
-# SWAP INFO
-SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
-readonly SWAP_FILE
-SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s "$SWAP_FILE")
-readonly SWAP_FILE_BYTES
-readonly SWAP_FILE_GB=$((SWAP_FILE_BYTES / 1024 / 1024))
-
-# COLORS
 readonly COLOUR_RESET='\e[0m'
 readonly aCOLOUR=(
     '\e[38;5;154m' # green  	| Lines, bullets and separators
@@ -41,34 +20,27 @@ readonly GREEN_LINE=" ${aCOLOUR[0]}───────────────
 readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
 readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
-LOG_FILE="install_log.txt"
-
-###############################################################################
-# Trap Ctrl+C to exit gracefully                                              #
-###############################################################################
+# Trap Ctrl+C to exit gracefully
 trap 'onCtrlC' INT
 onCtrlC() {
     echo -e "${COLOUR_RESET}"
     exit 1
 }
 
-###############################################################################
-# Helpers                                                                     #
-###############################################################################
 show() {
     # OK
     if (($1 == 0)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}  OK  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}    OK    $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     # FAILED
     elif (($1 == 1)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}FAILED$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[3]}  FAILED  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
         exit 1
     # INFO
     elif (($1 == 2)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]} INFO $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[0]}   INFO   $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     # NOTICE
     elif (($1 == 3)); then
-        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}NOTICE$COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
+        echo -e "${aCOLOUR[2]}[$COLOUR_RESET${aCOLOUR[4]}  NOTICE  $COLOUR_RESET${aCOLOUR[2]}]$COLOUR_RESET $2" | tee -a $LOG_FILE
     fi
 }
 
@@ -87,19 +59,8 @@ ColorReset() {
 ###############################################################################
 # Install Package Dependencies                                                #
 ###############################################################################
-Update_Package_Resource() {
-    show 2 "Updating package manager..."
-    GreyStart
-    sudo apt-get update -y
-    ColorReset
-}
-
-Upgrade_Package_Resource() {
-    show 2 "Upgrading package manager..."
-    GreyStart
-    sudo apt-get upgrade -y
-    ColorReset
-}
+readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
+readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
 
 Install_Depends() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
@@ -125,9 +86,25 @@ Check_Dependency_Installation() {
     done
 }
 
+Update_Package_Resource() {
+    show 2 "Updating package manager..."
+    GreyStart
+    sudo apt-get update -y
+    ColorReset
+}
+
+Upgrade_Package_Resource() {
+    show 2 "Upgrading package manager..."
+    GreyStart
+    sudo apt-get upgrade -y
+    ColorReset
+}
+
 ###############################################################################
 # Install Docker # https://docs.docker.com/engine/install/ubuntu/             #
 ###############################################################################
+source /etc/os-release # for $UBUNTU_CODENAME
+
 Install_Docker() {
     # See: https://docs.docker.com/engine/install/ubuntu/
     show 2 "Add Docker's official GPG key..."
@@ -216,6 +193,19 @@ Welcome_Banner() {
 # Swap Size                                                                   #
 # See: https://help.ubuntu.com/community/SwapFaq                              #
 ###############################################################################
+PHYSICAL_MEMORY_GB=$(LC_ALL=C free --giga | awk '/Mem:/ { print $2 }')
+readonly PHYSICAL_MEMORY_GB
+
+FREE_DISK_BYTES=$(LC_ALL=C df -P / | tail -n 1 | awk '{print $4}')
+readonly FREE_DISK_BYTES
+readonly FREE_DISK_GB=$((FREE_DISK_BYTES / 1024 / 1024))
+
+SWAP_FILE=$(LC_ALL=C swapon --show | tail -n 1 | awk '{print $1}')
+readonly SWAP_FILE
+SWAP_FILE_BYTES=$(LC_ALL=C stat -c %s "$SWAP_FILE")
+readonly SWAP_FILE_BYTES
+readonly SWAP_FILE_GB=$((SWAP_FILE_BYTES / 1024 / 1024))
+
 Set_Swap_Size() {
     show 2 "Turn off swap..."
     GreyStart
@@ -244,14 +234,6 @@ Set_Swap_Size() {
 # Digiur Net                                                                 #
 ###############################################################################
 Digiur_Net_Setup() {
-    # show 2 "Start ttyd..."
-    # GreyStart
-    # sudo systemctl status ttyd.service
-    # sudo cp ./etc/ttyd /etc/default/ttyd
-    # sudo systemctl restart ttyd.service
-    # sudo systemctl status ttyd.service
-    # ColorReset
-
     # local services=(
     #     alist audiobookshelf dashy handbrake jellyfin librespeed mealie memos myspeed
     #     navidrome portainer prowlarr qdirstat radarr romm snapdrop sonarr swing-music
