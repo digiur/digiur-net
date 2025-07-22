@@ -250,9 +250,24 @@ Digiur_Net_Setup() {
     )
 
     for svc in "${services[@]}"; do
-        show 2 "Start $svc..."
+        COMPOSE_FILE="./docker/$svc/docker-compose.yml"
+
+        if docker compose -f "$COMPOSE_FILE" ps -q | xargs docker inspect -f '{{.State.Running}}' 2>/dev/null | grep -q true; then
+            show 2 "Service $svc is running — stopping (down)..."
+            GreyStart
+            docker compose -f "$COMPOSE_FILE" down
+            ColorReset
+        else
+            show 4 "Service $svc is not running."
+        fi
+    done
+
+    for svc in "${services[@]}"; do
+        COMPOSE_FILE="./docker/$svc/docker-compose.yml"
+
+        echo "Starting $svc..."
         GreyStart
-        docker compose -f "./docker/$svc/docker-compose.yml" up -d
+        docker compose -f "$COMPOSE_FILE" up -d
         ColorReset
     done
 }
