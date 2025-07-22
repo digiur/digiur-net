@@ -304,7 +304,7 @@ Handle_Dashy_IP_Config() {
     if [ -f "$DASHY_TEMPLATE" ]; then
         cp "$DASHY_TEMPLATE" "$DASHY_CONF"
         sed -i "s|{{HOST_IP}}|$HOST_IP|g" "$DASHY_CONF"
-        log "Dashy conf generated with IP: $HOST_IP"
+        show 0 "Dashy conf generated with IP: $HOST_IP"
     else
         show 1 "Template file $DASHY_TEMPLATE not found"
     fi
