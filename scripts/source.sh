@@ -90,14 +90,14 @@ ColorReset() {
 Update_Package_Resource() {
     show 2 "Updating package manager..."
     GreyStart
-    sudo apt-get update -qq
+    sudo apt-get update
     ColorReset
 }
 
 Upgrade_Package_Resource() {
     show 2 "Upgrading package manager..."
     GreyStart
-    sudo apt-get upgrade -qq
+    sudo apt-get upgrade
     ColorReset
 }
 
@@ -108,7 +108,7 @@ Install_Depends() {
             local packageNeeded=${DEPEND_PACKAGES[i]}
             show 2 "Install the necessary dependency: \e[33m$packageNeeded \e[0m"
             GreyStart
-            sudo apt-get -y -qq install "$packageNeeded" --no-upgrade
+            sudo apt-get -y install "$packageNeeded" --no-upgrade
             ColorReset
         fi
     done
@@ -148,7 +148,7 @@ Install_Docker() {
     show 2 "Install Packages..."
     Update_Package_Resource
     GreyStart
-    sudo apt-get -y -qq install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ColorReset
 }
 
