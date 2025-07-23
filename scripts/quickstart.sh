@@ -4,10 +4,12 @@ LOG_FILE="quickstart_log.txt"
 
 # Function to log messages
 log() {
+    echo \e[0m
     echo "[ digiur-net ] $1" | tee -a $LOG_FILE
+    echo \e[2m
 }
 log_date() {
-    echo "$(date +"%Y-%m-%d %H:%M:%S")" | tee -a $LOG_FILE
+    log "$(date +"%Y-%m-%d %H:%M:%S")"
 }
 
 log_date
@@ -89,3 +91,5 @@ else
 fi
 
 log_date
+
+echo \e[0m
