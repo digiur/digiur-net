@@ -68,6 +68,7 @@ services:
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
       - SERVER_COUNTRIES=Switzerland
+      - VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port
       - TZ=America/Denver
 
     restart: always
