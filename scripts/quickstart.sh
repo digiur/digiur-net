@@ -68,7 +68,7 @@ else
     fi
 
     log "Group change will be applied after logging out and back in."
-    log "Please log out and log back in to apply the group change, then rerun this script locally like `$QS_SCRIPT` to complete installation."
+    log "Please log out and log back in to apply the group change, then rerun this script locally like '$QS_SCRIPT' to complete installation."
     exit 0
 fi
 
