@@ -2,7 +2,6 @@
 
 LOG_FILE="quickstart_log.txt"
 
-# Function to log messages
 log() {
     echo \e[0m
     echo "[ digiur-net ] $1" | tee -a $LOG_FILE
@@ -82,6 +81,7 @@ fi
 
 log_date
 
+# Run the 'install.sh' script
 log "Running '$INSTALL_SCRIPT'..."
 if (cd "$REPO_DIR" && ./scripts/install.sh); then
     log "'$INSTALL_SCRIPT' executed successfully."
