@@ -1,36 +1,104 @@
+# Ubuntu Setup
+## Install OS
+- Boot to ubuntu server USB
+- For storage setup in installer select "use whole drive" and "LVM" for NVME drive (the smaller one)
+- That should use 100G and leave the rest of the space on that drive free for snapshots
+- Make sure the SSD is formatted and just completely free space
+## Storage Setup
+### Install ZFS
+```bash
+sudo apt update
+sudo apt install zfsutils-linux
+```
+#### Confirm intended storage drive is "sda"
+`lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL`
+#### Create zpool
+```bash
+sudo zpool create \
+  -o ashift=12 \
+  -O compression=zstd \
+  -O atime=off \
+  -O xattr=sa \
+  -O acltype=posixacl \
+  -O mountpoint=/storage \
+  storage /dev/sda
+```
+| Command Part | Function |
+|---|---|
+| ashift=12               | Optimizes for SSD block sizes (4K sectors) |
+| compression=zstd        | Enables zstd (efficient compression) |
+| atime=off               | Disables access time updates for better performance |
+| xattr=sa                | Stores extended attributes in System Attributes area instead of hidden files |
+| acltype=posixacl        | Enables POSIX ACL support (for Samba shares)|
+| -O mountpoint=/storage  | mounts `/storage/` |
+| storage /dev/sda        | Name of pool and which drive |
+#### Get zfs pool info and test compression ratio
+```bash
+df -h /storage
+zfs list
+zpool status storage
+```
+```bash
+cd /storage
+dd if=/dev/urandom bs=1M count=100 of=random.bin
+ls -lh random.bin
+zfs get compressratio storage
+```
+```bash
+cd /storage
+yes "this is compressible text" | head -n 100000 > text.txt
+ls -lh text.txt
+zfs get compressratio storage
+```
+### Permissions!
+#### Storage Ownership
+1000 is the PGID/PUID that the containers use
+```bash
+sudo chown -R 1000:1000 /storage
+```
+#### Ensure New Files Keep Correct Group**
+This ensures that if a container or a script creates something, it'll stay within group `1000`
+```bash
+sudo chmod g+s /storage
+```
+#### Set Default Permissions with ACL**
+```bash
+sudo apt install acl
+sudo setfacl -d -m group:1000:rwx /storage
+```
+This sets a **default ACL**, so even newly created files (from containers or scripts) will:
+* Have group `1000`
+* Be readable/writable/executable by the group
+Inspect with:
+```bash
+getfacl /storage
+```
 # digiur-net
-### Quick Setup digiur-net
-
-This assumes a machine with a smaller (likely nvme) drive for os and app files, and a larger (likely ssd) drive for large media files.
-
-1. Install Ubuntu Server 24.04
-    - Mount the small disk to `/`
-    - Mount the large disk to `/storage`
-
-2. Run this script
-```sh
+## Quick Setup digiur-net
+```bash
 wget -qO- https://raw.githubusercontent.com/digiur/digiur-net/main/scripts/quickstart.sh | bash
 ```
 This will download and run a quick-setup script that will clone this repo, and add the current user to the docker user group.
-
-3. Log out and log back in for the user group change to take effect.
-    - Take this time to edit `./transmission+gluetun.env` with your VPN credentials
-
-4. Run this script again
-```sh
+### Follow the instructions on screen
+- Log out and log back in for the user group change to take effect.
+- Run this script again
+```bash
 wget -qO- https://raw.githubusercontent.com/digiur/digiur-net/main/scripts/quickstart.sh | bash
 ```
-This time it will run the full install.
+### Fill out VPN Credentialls
+Follow the instructions in the file that's open for editing
+`ctrl + x` to exit
+`y` to save
+`enter` to use the same file name
 
-5. Everything should be fine...
 
-### Post Install Setup
+## Post Install Setup
 
-#### Portainer
+### Portainer
 
 Get forwarded port from gluten's logs.
 
-#### Transmission
+### Transmission
 
 Put the port in gluten's web GUI. It will have to be updated like that periodically... 
 Checking forwarded port: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/vpn-port-forwarding.md#test-it
@@ -38,7 +106,7 @@ Automate forwarded port: https://github.com/qdm12/gluetun-wiki/blob/main/setup/o
 
 Save directory options should be setup automatically
 
-#### Sonarr, Radarr, Prowlarr
+### Sonarr, Radarr, Prowlarr
 
 Login to each
 
@@ -72,7 +140,7 @@ sudo find /storage -type d -exec chmod g+s {} \;
 
 All directories in `/storage` will now **keep the `digiur` group** for any new files/folders created inside them — even by Docker containers.
 
-#### Prowlarr
+### Prowlarr
 
 Add indexers to prowlarr
 
@@ -82,7 +150,7 @@ Add transmission in settings -> download clients (username and password set duri
 
 Change Log Level to info
 
-#### Sonarr
+### Sonarr
 
 - Media settings
   - naming is fun
@@ -93,7 +161,7 @@ Change Log Level to info
 - Add transmission in download client
   - Category would be good
 
-#### Radarr
+### Radarr
 
 - Media settings
   - naming is fun
@@ -103,3 +171,5 @@ Change Log Level to info
 
 - Add transmission in download client
   - Category would be good
+
+

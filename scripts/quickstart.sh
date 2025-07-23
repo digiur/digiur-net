@@ -3,9 +3,7 @@
 LOG_FILE="quickstart_log.txt"
 
 log() {
-    echo -e \e[0m
     echo "[ digiur-net ] $1" | tee -a $LOG_FILE
-    echo -e \e[2m
 }
 log_date() {
     log "$(date +"%Y-%m-%d %H:%M:%S")"
@@ -40,7 +38,6 @@ else
         exit 1
     fi
 
-    # Inform user to log out/in and exit
     log "Group change will be applied after logging out and back in."
     log "Please log out and log back in to apply the group change, then rerun this script to continue."
     exit 0
@@ -75,9 +72,7 @@ source "$ENV_FILE"
 if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
     log "Some required credentials are missing or empty in '$ENV_FILE'. Opening it for editing..."
     ${EDITOR:-nano} "$ENV_FILE"
-
     source "$ENV_FILE"
-
     if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
         log "One or more credentials are still missing. Please complete the .env file before rerunning the script."
         exit 1
@@ -115,5 +110,3 @@ else
 fi
 
 log_date
-
-echo \e[0m
