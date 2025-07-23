@@ -25,6 +25,21 @@ else
     fi
 fi
 
+# Make the 'quickstart.sh' script executable
+QS_SCRIPT="$REPO_DIR/scripts/quickstart.sh"
+log "Making '$QS_SCRIPT' executable..."
+if [ -f "$QS_SCRIPT" ]; then
+    if chmod +x "$QS_SCRIPT"; then
+        log "'$QS_SCRIPT' made executable successfully."
+    else
+        log "Failed to make '$QS_SCRIPT' executable."
+        exit 1
+    fi
+else
+    log "'$QS_SCRIPT' not found."
+    exit 1
+fi
+
 # Check if user is already in 'docker' group
 if groups $USER | grep &>/dev/null '\bdocker\b'; then
     log "User '$USER' is already in the 'docker' group. Skipping group setup."
@@ -53,7 +68,7 @@ else
     fi
 
     log "Group change will be applied after logging out and back in."
-    log "Please log out and log back in to apply the group change, then rerun this script locally like `./digiur-net/scripts/quickstart.sh` to complete installation."
+    log "Please log out and log back in to apply the group change, then rerun this script locally like `$QS_SCRIPT` to complete installation."
     exit 0
 fi
 
