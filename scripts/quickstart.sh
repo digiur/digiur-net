@@ -3,9 +3,9 @@
 LOG_FILE="quickstart_log.txt"
 
 log() {
-    echo \e[0m
+    echo -e \e[0m
     echo "[ digiur-net ] $1" | tee -a $LOG_FILE
-    echo \e[2m
+    echo -e \e[2m
 }
 log_date() {
     log "$(date +"%Y-%m-%d %H:%M:%S")"
