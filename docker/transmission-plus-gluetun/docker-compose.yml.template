@@ -26,7 +26,6 @@ services:
       # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
       USER: {{TRANSMISSION_USER}}
       PASS: {{TRANSMISSION_PASS}}
-      PEERPORT: 60357
       PGID: 1000
       PUID: 1000
       TZ: America/Denver
@@ -69,7 +68,7 @@ services:
       - OPENVPN_PASSWORD={{VPN_PASS}}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_LISTENING_PORT=60357
+      - VPN_PORT_FORWARDING_UP_COMMAND='echo Im a port forwarding up command'
       - SERVER_COUNTRIES=Switzerland
       - TZ=America/Denver
 
