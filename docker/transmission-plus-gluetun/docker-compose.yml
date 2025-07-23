@@ -12,6 +12,7 @@ services:
   transmissionplus:
     image: linuxserver/transmission
     container_name: transmissionplus
+    env_file: ./transmission.env
 
     # All Transmission network traffic is routed through the Gluetun VPN container.
     # This is enforced by network_mode: "service:gluetun"
@@ -24,9 +25,8 @@ services:
     environment:
       # The following placeholders are replaced with real credentials by install.sh
       # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
-      USER: digiur
-      PASS: yohoyoho
-      PEERPORT: 60357
+      USER: ${DESIRED_TRANSMISSION_USER}
+      PASS: ${DESIRED_TRANSMISSION_PASS}
       PGID: 1000
       PUID: 1000
       TZ: America/Denver
@@ -63,8 +63,8 @@ services:
       # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
-      - OPENVPN_USER=JGtxmAcnVk0cvZGp+pmp
-      - OPENVPN_PASSWORD=7VymDvSipUDYNdqrd9uJPHsnAmywPAud
+      - OPENVPN_USER=${PROTON_VPN_USER}
+      - OPENVPN_PASSWORD=${PROTON_VPN_PASS}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
       - VPN_PORT_FORWARDING_LISTENING_PORT=60357

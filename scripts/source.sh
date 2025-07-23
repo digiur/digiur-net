@@ -272,27 +272,20 @@ Digiur_Net_Setup() {
     done
 }
 
-Handle_Transmission_Creds() {
-    show 2 "Handling Transmission and VPN credentials..."
-    CRED_FILE="./transmission+gluetun.env"
-    if [ ! -f "$CRED_FILE" ]; then
-        show 1 "Credentials file $CRED_FILE not found. Please create it and fill in Transmission and VPN credentials before running the install. See the quickstart instructions."
+Validate_Transmission_Creds() {
+    show 2 "Validating Transmission and VPN credential files..."
+
+    readonly FILE="./docker/transmission-plus-gluetun/transmission.env"
+    if [ ! -f "$FILE" ]; then
+        show 1 "Credentials file $FILE not found."
     fi
 
-    source "$CRED_FILE"
-    if [ -z "$TRANSMISSION_USER" ] || [ -z "$TRANSMISSION_PASS" ] || [ -z "$VPN_USER" ] || [ -z "$VPN_PASS" ]; then
-        show 1 "Credentials file $CRED_FILE is missing required values. Please edit it and fill in all credentials before running the install."
+    source ./docker/transmission-plus-gluetun/transmission.env
+    source ./docker/transmission-plus-gluetun/gluetun.env
+
+    if [ -z "$USER" ] || [ -z "$PASS" ] || [ -z "$OPENVPN_USER" ] || [ -z "$OPENVPN_PASSWORD" ]; then
+        show 1 "One or more required credentials are missing. Please edit $FILE."
     fi
-
-    TRANSMISSION_TEMPLATE="./docker/transmission-plus-gluetun/docker-compose.yml.template"
-    TRANSMISSION_COMPOSE="./docker/transmission-plus-gluetun/docker-compose.yml"
-
-    cp "$TRANSMISSION_TEMPLATE" "$TRANSMISSION_COMPOSE"
-
-    sed -i "s|{{TRANSMISSION_USER}}|$TRANSMISSION_USER|g" "$TRANSMISSION_COMPOSE"
-    sed -i "s|{{TRANSMISSION_PASS}}|$TRANSMISSION_PASS|g" "$TRANSMISSION_COMPOSE"
-    sed -i "s|{{VPN_USER}}|$VPN_USER|g" "$TRANSMISSION_COMPOSE"
-    sed -i "s|{{VPN_PASS}}|$VPN_PASS|g" "$TRANSMISSION_COMPOSE"
 }
 
 Handle_Dashy_IP_Config() {
