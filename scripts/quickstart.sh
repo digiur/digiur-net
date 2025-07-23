@@ -11,6 +11,20 @@ log_date() {
 
 log_date
 
+# Clone the 'digiur-net' repository
+REPO_DIR="digiur-net"
+if [ -d "$REPO_DIR" ]; then
+    log "'$REPO_DIR' already exists. Skipping git clone."
+else
+    log "Cloning 'digiur-net' repository from GitHub..."
+    if git clone https://github.com/digiur/digiur-net.git "$REPO_DIR"; then
+        log "'digiur-net' repository cloned successfully."
+    else
+        log "Failed to clone 'digiur-net' repository."
+        exit 1
+    fi
+fi
+
 # Check if user is already in 'docker' group
 if groups $USER | grep &>/dev/null '\bdocker\b'; then
     log "User '$USER' is already in the 'docker' group. Skipping group setup."
@@ -39,24 +53,8 @@ else
     fi
 
     log "Group change will be applied after logging out and back in."
-    log "Please log out and log back in to apply the group change, then rerun this script to continue."
+    log "Please log out and log back in to apply the group change, then rerun this script locally like `./digiur-net/scripts/quickstart.sh` to complete installation."
     exit 0
-fi
-
-log_date
-
-# Clone the 'digiur-net' repository
-REPO_DIR="digiur-net"
-if [ -d "$REPO_DIR" ]; then
-    log "'$REPO_DIR' already exists. Skipping git clone."
-else
-    log "Cloning 'digiur-net' repository from GitHub..."
-    if git clone https://github.com/digiur/digiur-net.git "$REPO_DIR"; then
-        log "'digiur-net' repository cloned successfully."
-    else
-        log "Failed to clone 'digiur-net' repository."
-        exit 1
-    fi
 fi
 
 log_date
