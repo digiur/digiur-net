@@ -281,7 +281,6 @@ Validate_Transmission_Creds() {
     fi
 
     source ./docker/transmission-plus-gluetun/transmission.env
-    source ./docker/transmission-plus-gluetun/gluetun.env
 
     if [ -z "$USER" ] || [ -z "$PASS" ] || [ -z "$OPENVPN_USER" ] || [ -z "$OPENVPN_PASSWORD" ]; then
         show 1 "One or more required credentials are missing. Please edit $FILE."
