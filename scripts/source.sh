@@ -284,16 +284,7 @@ Validate_Transmission_Creds() {
     source "$ENV_FILE"
 
     if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
-        show 2 "Some required credentials are missing or empty in '$ENV_FILE'. Opening it for editing..."
-        ${EDITOR:-nano} "$ENV_FILE"
-
-        source "$ENV_FILE"
-
-        if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
-            show 1 "One or more credentials are still missing. Please complete the .env file before rerunning the script."
-        else
-            show 0 "All required credentials found. Continuing..."
-        fi
+        show 1 "Some required credentials are missing or empty in '$ENV_FILE'. Please complete the .env file before rerunning the install script."
     else
         show 0 "All required credentials found in the .env file."
     fi

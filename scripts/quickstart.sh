@@ -64,6 +64,30 @@ fi
 
 log_date
 
+# edit .env file for transmission-plus-gluetun
+ENV_FILE="./digiur-net/docker/transmission-plus-gluetun/.env"
+log "Checking credentials in $ENV_FILE..."
+if [ ! -f "$ENV_FILE" ]; then
+    log "Error: Credentials file '$ENV_FILE' not found. It should have been included in the repository."
+    exit 1
+fi
+source "$ENV_FILE"
+if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
+    log "Some required credentials are missing or empty in '$ENV_FILE'. Opening it for editing..."
+    ${EDITOR:-nano} "$ENV_FILE"
+
+    source "$ENV_FILE"
+
+    if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
+        log "One or more credentials are still missing. Please complete the .env file before rerunning the script."
+        exit 1
+    else
+        log "All required credentials found. Continuing..."
+    fi
+else
+    log "All required credentials found in the .env file."
+fi
+
 # Make the 'install.sh' script executable
 INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
 log "Making '$INSTALL_SCRIPT' executable..."
