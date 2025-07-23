@@ -273,7 +273,7 @@ Digiur_Net_Setup() {
 }
 
 Validate_Transmission_Creds() {
-    ENV_FILE="./docker/transmission-plus-glutun/.env"
+    ENV_FILE="./docker/transmission-plus-gluetun/.env"
 
     show 2 "Checking credentials in $ENV_FILE..."
 
