@@ -68,7 +68,6 @@ services:
       - OPENVPN_PASSWORD={{VPN_PASS}}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_UP_COMMAND='echo Im a port forwarding up command'
       - SERVER_COUNTRIES=Switzerland
       - TZ=America/Denver
 
