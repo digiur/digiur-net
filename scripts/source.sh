@@ -273,17 +273,29 @@ Digiur_Net_Setup() {
 }
 
 Validate_Transmission_Creds() {
-    show 2 "Validating Transmission and VPN credential files..."
+    ENV_FILE="./digiur-net/docker/transmission-plus-glutun/.env"
 
-    readonly FILE="./docker/transmission-plus-gluetun/transmission.env"
-    if [ ! -f "$FILE" ]; then
-        show 1 "Credentials file $FILE not found."
+    show 2 "Checking credentials in $ENV_FILE..."
+
+    if [ ! -f "$ENV_FILE" ]; then
+        show 1 "Error: Credentials file '$ENV_FILE' not found. It should have been included in the repository."
     fi
 
-    source ./docker/transmission-plus-gluetun/transmission.env
+    source "$ENV_FILE"
 
-    if [ -z "$USER" ] || [ -z "$PASS" ] || [ -z "$OPENVPN_USER" ] || [ -z "$OPENVPN_PASSWORD" ]; then
-        show 1 "One or more required credentials are missing. Please edit $FILE."
+    if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
+        show 2 "Some required credentials are missing or empty in '$ENV_FILE'. Opening it for editing..."
+        ${EDITOR:-nano} "$ENV_FILE"
+
+        source "$ENV_FILE"
+
+        if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
+            show 1 "One or more credentials are still missing. Please complete the .env file before rerunning the script."
+        else
+            show 0 "All required credentials found. Continuing..."
+        fi
+    else
+        show 0 "All required credentials found in the .env file."
     fi
 }
 
