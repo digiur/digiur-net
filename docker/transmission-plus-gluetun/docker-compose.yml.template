@@ -69,6 +69,7 @@ services:
       - OPENVPN_PASSWORD={{VPN_PASS}}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_LISTENING_PORT=60357
       - SERVER_COUNTRIES=Switzerland
       - TZ=America/Denver
 
