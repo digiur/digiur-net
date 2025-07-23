@@ -4,7 +4,7 @@ LOG_FILE="quickstart_log.txt"
 
 # Function to log messages
 log() {
-    echo "$1" | tee -a $LOG_FILE
+    echo "[ digiur-net ] $1" | tee -a $LOG_FILE
 }
 log_date() {
     echo "$(date +"%Y-%m-%d %H:%M:%S")" | tee -a $LOG_FILE
