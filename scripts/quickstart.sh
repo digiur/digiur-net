@@ -4,8 +4,13 @@ LOG_FILE="quickstart_log.txt"
 
 # Function to log messages
 log() {
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a $LOG_FILE
+    echo "$1" | tee -a $LOG_FILE
 }
+log_date() {
+    echo "$(date +"%Y-%m-%d %H:%M:%S")" | tee -a $LOG_FILE
+}
+
+log_date
 
 # Clone the 'digiur-net' repository
 REPO_DIR="digiur-net"
@@ -20,6 +25,8 @@ else
         exit 1
     fi
 fi
+
+log_date
 
 # Check if user is already in 'docker' group
 if groups $USER | grep &>/dev/null '\bdocker\b'; then
@@ -56,6 +63,8 @@ else
     exit 0
 fi
 
+log_date
+
 # Make the 'install.sh' script executable
 INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
 log "Making '$INSTALL_SCRIPT' executable..."
@@ -71,6 +80,8 @@ else
     exit 1
 fi
 
+log_date
+
 log "Running '$INSTALL_SCRIPT'..."
 if (cd "$REPO_DIR" && ./scripts/install.sh); then
     log "'$INSTALL_SCRIPT' executed successfully."
@@ -78,3 +89,5 @@ else
     log "Failed to execute '$INSTALL_SCRIPT'. Check the log for details."
     exit 1
 fi
+
+log_date
