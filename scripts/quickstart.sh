@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 LOG_FILE="quickstart_log.txt"
 
@@ -24,21 +25,11 @@ else
         exit 1
     fi
 fi
-
-# Make the 'quickstart.sh' script executable
+chmod +x ./$REPO_DIR/scripts/*
 QS_SCRIPT="$REPO_DIR/scripts/quickstart.sh"
-log "Making '$QS_SCRIPT' executable..."
-if [ -f "$QS_SCRIPT" ]; then
-    if chmod +x "$QS_SCRIPT"; then
-        log "'$QS_SCRIPT' made executable successfully."
-    else
-        log "Failed to make '$QS_SCRIPT' executable."
-        exit 1
-    fi
-else
-    log "'$QS_SCRIPT' not found."
-    exit 1
-fi
+INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
+
+log_date
 
 # Check if user is already in 'docker' group
 if groups $USER | grep &>/dev/null '\bdocker\b'; then
@@ -94,21 +85,6 @@ if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSIO
     fi
 else
     log "All required credentials found in the .env file."
-fi
-
-# Make the 'install.sh' script executable
-INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
-log "Making '$INSTALL_SCRIPT' executable..."
-if [ -f "$INSTALL_SCRIPT" ]; then
-    if chmod +x "$INSTALL_SCRIPT"; then
-        log "'$INSTALL_SCRIPT' made executable successfully."
-    else
-        log "Failed to make '$INSTALL_SCRIPT' executable."
-        exit 1
-    fi
-else
-    log "'$INSTALL_SCRIPT' not found."
-    exit 1
 fi
 
 log_date

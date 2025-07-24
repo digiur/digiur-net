@@ -1,0 +1,15 @@
+# put this in /etc/systemd/system/watch-gluetun-port.service
+[Unit]
+Description=Watch Gluetun forwarded port and restart Transmission
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=digiur
+ExecStart=/home/digiur/digiur-net/scripts/watch-gluetun-port.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
