@@ -1,0 +1,13 @@
+# Ignore everything in the docker directory
+docker/*
+
+# But do not ignore directories themselves
+!docker/**
+
+# And do not ignore docker-compose.yml files
+!docker/**/docker-compose.yml
+
+# And do not ignore specific files
+!docker/transmission-plus-gluetun/transmission.env
+!docker/transmission-plus-gluetun.env
+!docker/dashy/app/user-data/conf.yml.template
