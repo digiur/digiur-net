@@ -162,13 +162,14 @@ ls /mnt/base-install
 ```
 ### Transmission
 Save directory options should be set to `/storage/` somewhere
+
 ### Sonarr, Radarr, Prowlarr
 Login to each
 
 make `tv` dir in `/storage`
 
 make `movies` dir in `/storage`
-```bash
+<!-- ```bash
 cd /storage/
 mkdir tv
 mkdir movies
@@ -187,7 +188,7 @@ Everyone in the `digiur` group can read/write/execute files in `/storage`, and o
 ```bash
 sudo find /storage -type d -exec chmod g+s {} \;
 ```
-All directories in `/storage` will now **keep the `digiur` group** for any new files/folders created inside them — even by Docker containers.
+All directories in `/storage` will now **keep the `digiur` group** for any new files/folders created inside them — even by Docker containers. -->
 ### Prowlarr
 Add indexers to prowlarr
 
@@ -213,3 +214,61 @@ Change Log Level to info
   - add movies root directory
 - Add transmission in download client
   - Category would be good
+Here’s a set of targeted recommendations based on your hardware and running services, showing **exactly what each tweak does**, its **power-saving benefit**, and the **potential trade-offs** so you can pick and choose:
+
+| **Tweak**                                                                                                                            | **What It Does**                                               | **Power Benefit**                                     | **Trade-Offs / Consequences**                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| **CPU governor → `powersave`**<br>`sudo apt install cpufrequtils`<br>`sudo cpufreq-set -r -g powersave`                              | Cuts clock speed aggressively when idle                        | 5–15 W less at idle on N100                           | Slower responsiveness under bursty load (e.g. compiling)                                          |
+| **Disable unused services**<br>e.g. `sudo systemctl disable fwupd ModemManager multipathd udisks2 upower`                            | Stops background daemons you don’t need                        | \~0.5–2 W per service                                 | If you need firmware updates (fwupd) or power management (upower) later, you’ll have to re-enable |
+| **`noatime` in `/etc/fstab`**<br>Change<br>`/dev/mapper/ubuntu--vg-ubuntu--lv / ext4 defaults 0 1`<br>to<br>`… defaults,noatime 0 1` | Avoids writes on every file read                               | Reduces SSD writes and a few CPU cycles per I/O       | You lose access-time updates seen by some forensic tools (rarely used)                            |
+| **`vm.dirty_ratio=5`** in `/etc/sysctl.d/99-power.conf`                                                                              | Flushes dirty pages more frequently in smaller batches         | Lower burst of disk I/O, slightly steadier power draw | Increases I/O interrupts slightly—minimal risk if you have a UPS                                  |
+| **USB autosuspend**<br>`echo auto > /sys/bus/usb/devices/usbX/power/control`                                                         | Suspends idle USB controllers and devices                      | 0.1–1 W per controller                                | Some USB drives or dongles may disconnect; you can whitelist critical ones in TLP                 |
+| **Ethernet power-save**<br>`sudo ethtool -s enp1s0 wol d`                                                                            | Disables Wake-on-LAN                                           | \~0.2 W saved on NIC                                  | You lose remote-wake capability                                                                   |
+| **Install TLP**<br>`sudo apt install tlp`<br>`sudo tlp start`                                                                        | Auto-tunes many of the above and more (disk, PCIe, runtime PM) | Consolidates savings—often 5–10 W total               | Some tunables may interfere with time-sensitive workloads; you can override in `/etc/tlp.conf`    |
+| **Reduce download slots in Transmission**<br>Web UI → Preferences → Bandwidth                                                        | Fewer simultaneous peers → fewer threads and sockets           | <0.5 W per 10 slots reduced                           | Slightly slower torrent peer discovery and throughput                                             |
+| **Disable LPD in Transmission**<br>`"lpd-enabled": false` in `settings.json`                                                         | Turns off LAN peer scanning                                    | Negligible power (but every little bit)               | No effect on public torrents                                                                      |
+| **Fan curve / undervolt**<br>BIOS tweak or `intel-undervolt`                                                                         | Lowers fan speed and CPU voltage                               | 2–5 W less, much quieter                              | Risk of instability if undervolted too far                                                        |
+
+---
+
+### How to apply the top picks:
+
+1. **Set the CPU governor**
+
+   ```bash
+   sudo apt install cpufrequtils
+   echo 'GOVERNOR="powersave"' | sudo tee /etc/default/cpufrequtils
+   sudo systemctl restart cpufrequtils
+   ```
+
+2. **Add `noatime`** to `/etc/fstab` for your root LV:
+
+   ```diff
+   - /dev/mapper/ubuntu--vg-ubuntu--lv / ext4 defaults 0 1
+   + /dev/mapper/ubuntu--vg-ubuntu--lv / ext4 defaults,noatime 0 1
+   ```
+
+   Then `sudo mount -o remount /`.
+
+3. **Tune dirty ratio**: create `/etc/sysctl.d/99-power.conf` with:
+
+   ```
+   vm.dirty_ratio = 5
+   ```
+
+   and run `sudo sysctl --system`.
+
+4. **Disable extra services**:
+
+   ```bash
+   sudo systemctl disable fwupd ModemManager multipathd udisks2 upower
+   ```
+
+5. **Install and start TLP** for an all-in-one approach:
+
+   ```bash
+   sudo apt install tlp
+   sudo tlp start
+   ```
+
+After these, rerun `powertop` (or measure on your meter) to see cumulative savings. Adjust more aggressively (USB suspend, undervolt) once you’ve confirmed system stability.
