@@ -1,8 +1,5 @@
 # Ignore everything in the docker directory
-docker/*
-
-# But do not ignore directories themselves
-!docker/**
+docker/**
 
 # And do not ignore docker-compose.yml files
 !docker/**/docker-compose.yml
