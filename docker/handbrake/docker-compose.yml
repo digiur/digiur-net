@@ -8,6 +8,9 @@ services:
     environment:
       USER_ID: 1000
 
+    devices:
+      - /dev/dri:/dev/dri
+
     ports:
       - 5800:5800
 
