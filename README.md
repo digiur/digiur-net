@@ -8,10 +8,12 @@
 ### Install ZFS
 ```bash
 sudo apt update
-sudo apt install zfsutils-linux
+sudo apt install zfsutils-linux acl inotify-tools
 ```
 #### Confirm intended storage drive is "sda"
-`lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL`
+```bash
+lsblk -o NAME,SIZE,TYPE,MOUNTPOINT,MODEL
+```
 #### Create zpool
 ```bash
 sudo zpool create \
@@ -63,7 +65,6 @@ sudo chmod g+s /storage
 ```
 #### Set Default Permissions with ACL
 ```bash
-sudo apt install acl
 sudo setfacl -m group:1000:rwx /storage
 sudo setfacl -d -m group:1000:rwx /storage
 sudo setfacl -d -m mask::rwx /storage
@@ -92,18 +93,25 @@ Follow the instructions in the file that's open for editing
 `ctrl + x` to exit
 `y` to save
 `enter` to use the same file name
-
 ## Post Install Setup
 ### Transmission port updater
+Install inotify-tools
+```bash
+sudo apt update
+sudo apt install inotify-tools
+```
 Copy .system file to correct location
 ```bash
-sudo cp ./digiur-net/scripts/services/watch-gluetun-port.service /etc/systemd/system/`
+sudo cp ./digiur-net/scripts/services/watch-gluetun-port.service /etc/systemd/system/
 ```
 Start it
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable watch-gluetun-port
 sudo systemctl start watch-gluetun-port
+sudo systemctl restart watch-gluetun-port
+sudo systemctl status watch-gluetun-port
+sudo systemctl stop watch-gluetun-port
 ```
 Check logs
 ```bash
@@ -115,22 +123,45 @@ journalctl -f -u watch-gluetun-port
 ```
 Manually edit file
 ```bash
-echo 65000 | sudo tee ~/digiur-net/docker/transmission-plus-gluetun/gluetun/forwarded_port
+echo 65000 | sudo tee ./digiur-net/docker/transmission-plus-gluetun/gluetun/forwarded_port
+echo 61234 > /tmp/tmpport
+sudo mv /tmp/tmpport ~/digiur-net/docker/transmission-plus-gluetun/gluetun/forwarded_port
 ```
 Chack from transmission container what ports it's listening to
 ```bash
-docker compose exec transmissionplus netstat -tulnp
+docker compose -f ./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml exec transmissionplus netstat -tulnp
 ```
-### Portainer
-Get forwarded port from gluten's logs.
+Restart gluetun to trigger _it_ to write a port (should cascade a restart of transmission)
+```bash
+docker compose -f ./digiur-net/docker/transmission-plus-gluetun/docker-compose.yml restart gluetun
+```
+### Snapshot
+#### Fix Swap
+```bash
+sudo lvcreate -L 8G -n swap ubuntu-vg
+sudo mkswap /dev/ubuntu-vg/swap
+swapon --show
+sudo swapoff -a
+sudo swapon /dev/ubuntu-vg/swap
+swapon --show
+sudo nano /etc/fstab
+```
+replace old swap line with `/dev/ubuntu-vg/swap none swap sw 0 0`
+delete old swap file `/swap.img`
+#### Set Snapshot
+```bash
+sudo lvs
+sudo lvcreate --snapshot --size 100G --name base-install /dev/ubuntu-vg/ubuntu-lv
+```
+#### Mount Snapshot (For lookin at)
+```bash
+sudo mkdir -p /mnt/base-install
+sudo mount -o ro /dev/ubuntu-vg/base-install /mnt/base-install
+mount | grep base-install
+ls /mnt/base-install
+```
 ### Transmission
-Put the port in gluten's web GUI. It will have to be updated like that periodically... 
-
-Checking forwarded port: https://github.com/qdm12/gluetun-wiki/blob/main/setup/advanced/vpn-port-forwarding.md#test-it
-
-Automate forwarded port: https://github.com/qdm12/gluetun-wiki/blob/main/setup/options/port-forwarding.md
-
-Save directory options should be setup automatically
+Save directory options should be set to `/storage/` somewhere
 ### Sonarr, Radarr, Prowlarr
 Login to each
 
