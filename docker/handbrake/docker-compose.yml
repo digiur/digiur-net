@@ -7,6 +7,12 @@ services:
 
     environment:
       USER_ID: 1000
+      AUTOMATED_CONVERSION_PRESET: "General/H.265 QSV 720p"
+      AUTOMATED_CONVERSION_OUTPUT_SUBDIR: SAME_AS_SRC
+      AUTOMATED_CONVERSION_FORMAT: m4v
+      AUTOMATED_CONVERSION_NON_VIDEO_FILE_ACTION: copy
+      AUTOMATED_CONVERSION_OVERWRITE_OUTPUT: 1
+      AUTOMATED_CONVERSION_SOURCE_STABLE_TIME: 60
 
     devices:
       - /dev/dri:/dev/dri
@@ -16,6 +22,7 @@ services:
 
     volumes:
       - ./config:/config
-      - /storage:/storage
+      - /storage/media:/output
+      - /storage/media/downloads/raw:/watch
 
     restart: unless-stopped
