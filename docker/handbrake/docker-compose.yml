@@ -12,7 +12,7 @@ services:
       AUTOMATED_CONVERSION_FORMAT: m4v
       AUTOMATED_CONVERSION_NON_VIDEO_FILE_ACTION: copy
       AUTOMATED_CONVERSION_OVERWRITE_OUTPUT: 1
-      AUTOMATED_CONVERSION_SOURCE_STABLE_TIME: 60
+      AUTOMATED_CONVERSION_SOURCE_STABLE_TIME: 7
 
     devices:
       - /dev/dri:/dev/dri
@@ -24,5 +24,6 @@ services:
       - ./config:/config
       - /storage/media:/output
       - /storage/media/downloads/raw:/watch
+      - /storage:/storage
 
     restart: unless-stopped
