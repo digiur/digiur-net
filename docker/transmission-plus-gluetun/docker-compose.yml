@@ -20,7 +20,7 @@ services:
 
     volumes:
       - ./transmission/config:/config
-      - /storage/downloads:/storage/downloads
+      - /storage/media/downloads:/storage/media/downloads
 
     environment:
       # The following placeholders are replaced with real credentials by install.sh
