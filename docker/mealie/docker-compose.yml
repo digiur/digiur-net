@@ -9,6 +9,7 @@ services:
       PUID: 1000
       GUID: 1000
       TZ: America/Denver
+      BASE_URL: http://192.168.1.99
 
     ports:
       - 9925:9000
