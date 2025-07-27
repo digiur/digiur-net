@@ -35,6 +35,7 @@ services:
 
   romm-db:
     image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
+    cpu_shares: 1024
     container_name: romm-db
     restart: unless-stopped
     environment:
