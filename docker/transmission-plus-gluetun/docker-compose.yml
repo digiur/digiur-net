@@ -37,6 +37,7 @@ services:
 
   gluetun:
     image: qmcgaw/gluetun
+    cpu_shares: 2048
     container_name: gluetun
 
     # NET_ADMIN and /dev/net/tun are required for VPN operation
