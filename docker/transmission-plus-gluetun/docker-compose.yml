@@ -20,6 +20,7 @@ services:
 
     volumes:
       - ./transmission/config:/config
+      - ./watch:/watch
       - /storage/media/downloads:/storage/media/downloads
 
     environment:
