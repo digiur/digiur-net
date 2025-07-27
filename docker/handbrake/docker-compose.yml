@@ -4,10 +4,7 @@ services:
   handbrake:
     container_name: handbrake
     image: jlesage/handbrake
-    deploy:
-      resources:
-        limits:
-          cpus: '3.0'
+    cpu_shares: 512 # Set CPU shares to a lower value (e.g., 512)
     environment:
       USER_ID: 1000
       AUTOMATED_CONVERSION_PRESET: "General/H.265 QSV 720p"
