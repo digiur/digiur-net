@@ -11,6 +11,7 @@ name: transmission-plus-gluetun
 services:
   transmissionplus:
     image: linuxserver/transmission
+    cpu_shares: 2048
     container_name: transmissionplus
     env_file: ./transmission.env
 
