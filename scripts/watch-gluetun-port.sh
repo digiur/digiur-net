@@ -17,6 +17,7 @@ handle_port_change() {
   NEWPORT=$(< "$FORWARD_FILE")
   echo "Detected new port: $NEWPORT"
   echo "PEERPORT=$NEWPORT" > "$ENV_FILE"
+  echo "Skip settings file..."
   # sed -i -E "s/\"peer-port\"\s*:\s*[0-9]+/\"peer-port\": $NEWPORT/" "$TRANSMISSION_SETTINGS"
   docker compose up -d --no-deps --force-recreate transmissionplus
 }
