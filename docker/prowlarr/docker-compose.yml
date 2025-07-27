@@ -3,6 +3,7 @@ name: prowlarr
 services:
   prowlarr:
     image: linuxserver/prowlarr
+    cpu_shares: 1024
     container_name: prowlarr
 
     environment:

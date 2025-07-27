@@ -3,6 +3,7 @@ name: librespeed
 services:
   librespeed:
     image: lscr.io/linuxserver/librespeed
+    cpu_shares: 1024
     container_name: librespeed
 
     environment:

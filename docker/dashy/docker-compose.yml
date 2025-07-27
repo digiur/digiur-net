@@ -3,6 +3,7 @@ name: dashy
 services:
   dashy:
     image: lissy93/dashy
+    cpu_shares: 1024
     container_name: dashy
 
     environment:

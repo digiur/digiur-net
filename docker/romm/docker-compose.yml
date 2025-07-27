@@ -5,6 +5,7 @@ volumes:
 services:
   romm:
     image: rommapp/romm:latest
+    cpu_shares: 1024
     container_name: romm
     depends_on:
       - romm-db

@@ -3,6 +3,7 @@ name: mealie
 services:
   mealie:
     image: ghcr.io/mealie-recipes/mealie
+    cpu_shares: 1024
     container_name: mealie
 
     environment:

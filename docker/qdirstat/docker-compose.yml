@@ -3,6 +3,7 @@ name: qdirstat
 services:
   qdirstat:
     image: lscr.io/linuxserver/qdirstat
+    cpu_shares: 1024
     container_name: qdirstat
 
     environment:

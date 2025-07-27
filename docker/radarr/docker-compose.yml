@@ -3,6 +3,7 @@ name: radarr
 services:
   radarr:
     image: linuxserver/radarr
+    cpu_shares: 1024
     container_name: radarr
 
     environment:

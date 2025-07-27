@@ -3,6 +3,7 @@ name: myspeed
 services:
   myspeed:
     image: germannewsmaker/myspeed
+    cpu_shares: 1024
     container_name: myspeed
 
     ports:
