@@ -7,7 +7,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '3.0'
+          cpus: '2.0'
     environment:
       USER_ID: 1000
       AUTOMATED_CONVERSION_PRESET: "General/H.265 QSV 720p"
