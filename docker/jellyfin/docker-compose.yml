@@ -4,6 +4,7 @@ services:
   jellyfin:
     image: linuxserver/jellyfin
     container_name: jellyfin
+    cpu_shares: 2048
 
     environment:
       PGID: 1000
