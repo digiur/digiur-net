@@ -19,7 +19,7 @@ handle_port_change() {
   echo "PEERPORT=$NEWPORT" > "$ENV_FILE"
   echo "Skip settings file..."
   # sed -i -E "s/\"peer-port\"\s*:\s*[0-9]+/\"peer-port\": $NEWPORT/" "$TRANSMISSION_SETTINGS"
-  docker exec -it transmissionplus "transmission-remote -n digiur:yohoyoho --port $NEWPORT"
+  docker exec transmissionplus transmission-remote -n digiur:yohoyoho --port $NEWPORT
 }
 
 echo "Watching $FORWARD_FILE for changes… Now with no docker rebuilds!"
