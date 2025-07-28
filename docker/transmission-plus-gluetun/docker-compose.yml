@@ -13,7 +13,6 @@ services:
     image: linuxserver/transmission
     cpu_shares: 2048
     container_name: transmissionplus
-    env_file: ./transmission.env
 
     # All Transmission network traffic is routed through the Gluetun VPN container.
     # This is enforced by network_mode: "service:gluetun"

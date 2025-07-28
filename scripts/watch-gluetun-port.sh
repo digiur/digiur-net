@@ -19,10 +19,10 @@ handle_port_change() {
   echo "PEERPORT=$NEWPORT" > "$ENV_FILE"
   echo "Skip settings file..."
   # sed -i -E "s/\"peer-port\"\s*:\s*[0-9]+/\"peer-port\": $NEWPORT/" "$TRANSMISSION_SETTINGS"
-  docker compose up -d --no-deps --force-recreate transmissionplus
+  docker exec -it transmissionplus "transmission-remote -n digiur:yohoyoho --port $NEWPORT"
 }
 
-echo "Watching $FORWARD_FILE for changes…"
+echo "Watching $FORWARD_FILE for changes… Now with no docker rebuilds!"
 
 # Watch the *directory* for the forwarded_port file being created/moved
 inotifywait -m -e moved_to -e create "$FORWARD_DIR" | while read -r _ DIR FILENAME; do
