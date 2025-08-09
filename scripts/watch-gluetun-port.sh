@@ -4,8 +4,6 @@ set -euo pipefail
 COMPOSE_DIR="$HOME/digiur-net/docker/transmission-plus-gluetun"
 FORWARD_DIR="$COMPOSE_DIR/gluetun"
 FORWARD_FILE="$FORWARD_DIR/forwarded_port"
-ENV_FILE="$COMPOSE_DIR/transmission.env"
-TRANSMISSION_SETTINGS="$COMPOSE_DIR/transmission/config/settings.json"
 
 cd "$COMPOSE_DIR"
 
@@ -16,9 +14,6 @@ handle_port_change() {
   fi
   NEWPORT=$(< "$FORWARD_FILE")
   echo "Detected new port: $NEWPORT"
-  echo "PEERPORT=$NEWPORT" > "$ENV_FILE"
-  echo "Skip settings file..."
-  # sed -i -E "s/\"peer-port\"\s*:\s*[0-9]+/\"peer-port\": $NEWPORT/" "$TRANSMISSION_SETTINGS"
   docker exec transmissionplus transmission-remote -n digiur:yohoyoho --port $NEWPORT
 }
 
