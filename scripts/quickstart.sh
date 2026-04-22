@@ -6,15 +6,88 @@ LOG_FILE="quickstart_log.txt"
 log() {
     echo "[ digiur-net ] $1" | tee -a $LOG_FILE
 }
+
+log_section() {
+    log ""
+    log "=== $1 ==="
+}
+
 log_date() {
     log "$(date +"%Y-%m-%d %H:%M:%S")"
+}
+
+ensure_env_file_from_template() {
+    local env_file="$1"
+    local env_template="$2"
+
+    if [ -f "$env_file" ]; then
+        return
+    fi
+
+    if [ -f "$env_template" ]; then
+        cp "$env_template" "$env_file"
+        log "Created '$env_file' from template."
+    else
+        log "Error: '$env_file' is missing and template '$env_template' was not found."
+        exit 1
+    fi
+}
+
+validate_env_values() {
+    local env_file="$1"
+    local env_name="$2"
+    shift 2
+
+    local required_vars=("$@")
+    local missing=()
+    local var_name
+    local required_list
+
+    required_list="${required_vars[*]}"
+
+    log "$env_name requires: $required_list"
+
+    # shellcheck disable=SC1090
+    source "$env_file"
+
+    for var_name in "${required_vars[@]}"; do
+        if [[ -z "${!var_name:-}" ]]; then
+            missing+=("$var_name")
+        fi
+    done
+
+    if (( ${#missing[@]} > 0 )); then
+        log "$env_name is missing required values (${missing[*]}). Opening '$env_file' for editing..."
+        log "Save and close the editor when done, then quickstart will re-check automatically."
+        ${EDITOR:-nano} "$env_file"
+
+        # shellcheck disable=SC1090
+        source "$env_file"
+        missing=()
+
+        for var_name in "${required_vars[@]}"; do
+            if [[ -z "${!var_name:-}" ]]; then
+                missing+=("$var_name")
+            fi
+        done
+
+        if (( ${#missing[@]} > 0 )); then
+            log "$env_name still has missing values (${missing[*]}). Complete '$env_file' and rerun quickstart."
+            exit 1
+        fi
+    fi
+
+    log "$env_name credentials/config look good."
 }
 
 log_date
 
 # Clone the 'digiur-net' repository
 REPO_DIR="digiur-net"
-if [ -d "$REPO_DIR" ]; then
+if [ -d ".git" ] && [ -f "./scripts/install.sh" ]; then
+    REPO_DIR="."
+    log "Running from inside an existing digiur-net repository."
+elif [ -d "$REPO_DIR" ]; then
     log "'$REPO_DIR' already exists. Skipping git clone."
 else
     log "Cloning 'digiur-net' repository from GitHub..."
@@ -26,8 +99,9 @@ else
     fi
 fi
 chmod +x ./$REPO_DIR/scripts/*
-QS_SCRIPT="$REPO_DIR/scripts/quickstart.sh"
-INSTALL_SCRIPT="$REPO_DIR/scripts/install.sh"
+REPO_DIR_ABS="$(cd "$REPO_DIR" && pwd)"
+QS_SCRIPT="$REPO_DIR_ABS/scripts/quickstart.sh"
+INSTALL_SCRIPT="$REPO_DIR_ABS/scripts/install.sh"
 
 log_date
 
@@ -65,33 +139,41 @@ fi
 
 log_date
 
-# edit .env file for transmission-plus-gluetun
-ENV_FILE="./digiur-net/docker/transmission-plus-gluetun/.env"
-log "Checking credentials in $ENV_FILE..."
-if [ ! -f "$ENV_FILE" ]; then
-    log "Error: Credentials file '$ENV_FILE' not found. It should have been included in the repository."
-    exit 1
-fi
-source "$ENV_FILE"
-if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
-    log "Some required credentials are missing or empty in '$ENV_FILE'. Opening it for editing..."
-    ${EDITOR:-nano} "$ENV_FILE"
-    source "$ENV_FILE"
-    if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
-        log "One or more credentials are still missing. Please complete the .env file before rerunning the script."
-        exit 1
-    else
-        log "All required credentials found. Continuing..."
-    fi
-else
-    log "All required credentials found in the .env file."
-fi
+TRANSMISSION_ENV_FILE="$REPO_DIR_ABS/docker/transmission-plus-gluetun/.env"
+TRANSMISSION_ENV_TEMPLATE="$REPO_DIR_ABS/docker/transmission-plus-gluetun/.env.template"
+FOUNDRY_ENV_FILE="$REPO_DIR_ABS/docker/foundryvtt/.env"
+FOUNDRY_ENV_TEMPLATE="$REPO_DIR_ABS/docker/foundryvtt/.env.template"
+TAILSCALE_ENV_FILE="$REPO_DIR_ABS/docker/tailscale/.env"
+TAILSCALE_ENV_TEMPLATE="$REPO_DIR_ABS/docker/tailscale/.env.template"
+
+log_section "Preparing default stack env files"
+ensure_env_file_from_template "$TRANSMISSION_ENV_FILE" "$TRANSMISSION_ENV_TEMPLATE"
+ensure_env_file_from_template "$FOUNDRY_ENV_FILE" "$FOUNDRY_ENV_TEMPLATE"
+ensure_env_file_from_template "$TAILSCALE_ENV_FILE" "$TAILSCALE_ENV_TEMPLATE"
+
+log_section "Configuring Transmission + Gluetun"
+validate_env_values \
+    "$TRANSMISSION_ENV_FILE" \
+    "Transmission + Gluetun" \
+    PROTON_VPN_USER PROTON_VPN_PASS DESIRED_TRANSMISSION_USER DESIRED_TRANSMISSION_PASS
+
+log_section "Configuring FoundryVTT"
+validate_env_values \
+    "$FOUNDRY_ENV_FILE" \
+    "FoundryVTT" \
+    FOUNDRY_USERNAME FOUNDRY_PASSWORD FOUNDRY_ADMIN_KEY
+
+log_section "Configuring Tailscale"
+validate_env_values \
+    "$TAILSCALE_ENV_FILE" \
+    "Tailscale" \
+    TS_AUTHKEY TS_HOSTNAME
 
 log_date
 
 # Run the 'install.sh' script
 log "Running '$INSTALL_SCRIPT'..."
-if (cd "$REPO_DIR" && ./scripts/install.sh); then
+if (cd "$REPO_DIR_ABS" && ./scripts/install.sh); then
     log "'$INSTALL_SCRIPT' executed successfully."
 else
     log "Failed to execute '$INSTALL_SCRIPT'. Check the log for details."

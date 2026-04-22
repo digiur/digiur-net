@@ -1,6 +1,13 @@
 #!/usr/bin/bash
 
-source ./scripts/source.sh
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+source "$SCRIPT_DIR/source.sh"
+
+cd "$REPO_ROOT"
 
 Welcome_Logo || show 1 "Failed to display welcome logo"
 
@@ -33,29 +40,20 @@ show 0 "Docker installed..."
 Check_Docker_Install || show 1 "Docker installation check failed"
 show 0 "Docker installation check passed...."
 
-# Step 3: Upgrade package resource and re-check dependencies
+# Step 3: Set up digiur-net
 show_time
-show 2 "Step 3: Final Dependency Check"
-Upgrade_Package_Resource || show 1 "Failed to upgrade package resource"
-show 0 "Package resource upgraded..."
-
-Check_Dependency_Installation || show 1 "Dependency re-check failed"
-show 0 "Dependency re-check passed..."
-
-Check_Docker_Install || show 1 "Docker re-check failed"
-show 0 "Docker re-check passed..."
-
-# Step 4: Set up digiur-net
-show_time
-show 2 "Step 4: Set up digiur-net"
-Validate_Transmission_Creds || show 1 "Failed to validate Transmission credentials"
-show 0 "Transmission credentials validated..."
+show 2 "Step 3: Set up digiur-net"
+Validate_Default_Stack_Creds || show 1 "Failed to validate default stack credentials"
+show 0 "Default stack credentials validated..."
 
 Handle_Dashy_IP_Config || show 1 "Failed to update Dashy IPs"
 show 0 "Injected host IP into Dashy config..."
 
 Digiur_Net_Setup || show 1 "Failed to start up digiur-net"
 show 0 "Digiur-net setup completed successfully..."
+
+Install_Gluetun_Port_Watcher_Service || show 1 "Failed to install watch-gluetun-port service"
+show 0 "watch-gluetun-port service configured..."
 
 Welcome_Banner || show 1 "Failed to display welcome banner"
 

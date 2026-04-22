@@ -1,0 +1,18 @@
+# Services installed by default by scripts/install.sh
+# One service name per line, matching docker/<name>/docker-compose.yml
+
+dashy
+handbrake
+jellyfin
+librespeed
+mealie
+myspeed
+portainer
+prowlarr
+qdirstat
+radarr
+romm
+sonarr
+transmission-plus-gluetun
+foundryvtt
+tailscale

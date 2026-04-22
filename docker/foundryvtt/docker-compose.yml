@@ -1,0 +1,24 @@
+---
+name: foundryvtt
+services:
+  foundryvtt:
+    image: felddy/foundryvtt:release
+    container_name: foundryvtt
+    hostname: foundryvtt
+
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Denver
+      - FOUNDRY_USERNAME=${FOUNDRY_USERNAME}
+      - FOUNDRY_PASSWORD=${FOUNDRY_PASSWORD}
+      - FOUNDRY_ADMIN_KEY=${FOUNDRY_ADMIN_KEY}
+      - CONTAINER_PRESERVE_CONFIG=true
+
+    ports:
+      - 30000:30000/tcp
+
+    volumes:
+      - ./data:/data
+
+    restart: unless-stopped

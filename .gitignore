@@ -1,12 +1,18 @@
 install_log.txt
 
-# Ignore everything in the docker directory
+# Ignore runtime/generated files in docker by default
 docker/**
 
-# And do not ignore docker-compose.yml files
+# Keep directories visible so specific file exceptions below work
+!docker/**/
+
+# Explicitly track compose definitions
 !docker/**/docker-compose.yml
 
-# And do not ignore specific files
+# Explicitly track templates/docs needed for first-time setup
 !docker/transmission-plus-gluetun/transmission.env
 !docker/transmission-plus-gluetun.env
+!docker/transmission-plus-gluetun/.env.template
+!docker/foundryvtt/.env.template
+!docker/tailscale/.env.template
 !docker/dashy/app/user-data/conf.yml.template

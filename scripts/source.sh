@@ -6,6 +6,11 @@ echo -e "\e[0m\c"
 set -e
 
 LOG_FILE="install_log.txt"
+readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly ACTIVE_SERVICES_FILE="$REPO_ROOT/scripts/services/active-services.txt"
+readonly TRANSMISSION_ENV_FILE="$REPO_ROOT/docker/transmission-plus-gluetun/.env"
+readonly FOUNDRY_ENV_FILE="$REPO_ROOT/docker/foundryvtt/.env"
+readonly TAILSCALE_ENV_FILE="$REPO_ROOT/docker/tailscale/.env"
 
 readonly COLOUR_RESET='\e[0m'
 readonly aCOLOUR=(
@@ -16,7 +21,7 @@ readonly aCOLOUR=(
     '\e[33m'       # Yellow		| Emphasis
 )
 
-readonly GREEN_LINE=" ${aCOLOUR[0]}─────────────────────────────────────────────────────$COLOUR_RESET"
+readonly GREEN_LINE=" ${aCOLOUR[0]}-----------------------------------------------------$COLOUR_RESET"
 readonly GREEN_BULLET=" ${aCOLOUR[0]}-$COLOUR_RESET"
 readonly GREEN_SEPARATOR="${aCOLOUR[0]}:$COLOUR_RESET"
 
@@ -45,7 +50,7 @@ show() {
 }
 
 show_time() {
-    show 2 "$(date +"%Y-%m-%d %H:%M:%S")" 
+    show 2 "$(date +"%Y-%m-%d %H:%M:%S")"
 }
 
 GreyStart() {
@@ -63,13 +68,13 @@ readonly IP=$(ip route get 1.1.1.1 | awk '/src/ {print $7}')
 
 Welcome_Logo() {
     echo '
-     ____                          __    _____ 
+     ____                          __    _____
     |  __ \                      / __ \ / ____|
-    | |  \ \ _   _   _ _  _  __ | |  | | (___  
-    | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \ 
+    | |  \ \ _   _   _ _  _  __ | |  | | (___
+    | |   | |_|/ _ \|_| || |/ _\| |  | |\___ \
     | |__/ /| | (_| | | || | |  | |__| |____) |
-    |_____/ |_|\_  /|_|\_,_|_|   \____/|_____/ 
-             |____/                            
+    |_____/ |_|\_  /|_|\_,_|_|   \____/|_____/
+             |____/
 '
 }
 
@@ -92,8 +97,8 @@ Welcome_Banner() {
 ###############################################################################
 # Install Package Dependencies                                                #
 ###############################################################################
-readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates')
-readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates')
+readonly DEPEND_PACKAGES=('btop' 'ttyd' 'curl' 'samba' 'net-tools' 'ca-certificates' 'inotify-tools')
+readonly DEPEND_COMMANDS=('btop' 'ttyd' 'curl' 'smbd' 'netstat' 'update-ca-certificates' 'inotifywait')
 
 Install_Depends() {
     for ((i = 0; i < ${#DEPEND_COMMANDS[@]}; i++)); do
@@ -174,7 +179,7 @@ Check_Docker_Running() {
     for ((i = 1; i <= 3; i++)); do
         sleep 3
         if [[ $(sudo systemctl is-active docker) != "active" ]]; then
-            show 4 "Docker is not running, try to start"
+            show 3 "Docker is not running, try to start"
             sudo systemctl start docker
         else
             break
@@ -237,63 +242,108 @@ Set_Swap_Size() {
 ###############################################################################
 # Digiur Net                                                                 #
 ###############################################################################
+ACTIVE_SERVICES=()
+
+Load_Active_Services() {
+    if [[ ! -f "$ACTIVE_SERVICES_FILE" ]]; then
+        show 1 "Active services file '$ACTIVE_SERVICES_FILE' not found."
+    fi
+
+    mapfile -t ACTIVE_SERVICES < <(grep -Ev '^\s*(#|$)' "$ACTIVE_SERVICES_FILE")
+
+    if (( ${#ACTIVE_SERVICES[@]} == 0 )); then
+        show 1 "No active services were found in '$ACTIVE_SERVICES_FILE'."
+    fi
+}
+
 Digiur_Net_Setup() {
-    # local services=(
-    #     alist audiobookshelf dashy handbrake jellyfin librespeed mealie memos myspeed
-    #     navidrome portainer prowlarr qdirstat radarr romm snapdrop sonarr swing-music
-    #     transmission-plus-gluetun uptime-kuma
-    # )
+    local svc
+    local compose_file
 
-    local services=(
-        dashy handbrake jellyfin librespeed mealie myspeed portainer
-        prowlarr qdirstat radarr romm sonarr transmission-plus-gluetun
-    )
+    Load_Active_Services
 
-    for svc in "${services[@]}"; do
-        COMPOSE_FILE="./docker/$svc/docker-compose.yml"
+    for svc in "${ACTIVE_SERVICES[@]}"; do
+        compose_file="$REPO_ROOT/docker/$svc/docker-compose.yml"
 
-        if docker compose -f "$COMPOSE_FILE" ps -q | xargs docker inspect -f '{{.State.Running}}' 2>/dev/null | grep -q true; then
-            show 2 "Service $svc is running — stopping (down)..."
-            GreyStart
-            docker compose -f "$COMPOSE_FILE" down
-            ColorReset
-        else
-            show 4 "Service $svc is not running."
+        if [[ ! -f "$compose_file" ]]; then
+            show 1 "Compose file missing for service '$svc': $compose_file"
         fi
-    done
 
-    for svc in "${services[@]}"; do
-        COMPOSE_FILE="./docker/$svc/docker-compose.yml"
+        if docker compose -f "$compose_file" ps --status running -q | grep -q .; then
+            show 2 "Service $svc is already running - applying compose updates..."
+        else
+            show 2 "Service $svc is not running - starting..."
+        fi
 
-        echo "Starting $svc..."
         GreyStart
-        docker compose -f "$COMPOSE_FILE" up -d
+        docker compose -f "$compose_file" up -d
         ColorReset
     done
 }
 
 Validate_Transmission_Creds() {
-    ENV_FILE="./docker/transmission-plus-gluetun/.env"
+    show 2 "Checking Transmission + Gluetun credentials in $TRANSMISSION_ENV_FILE..."
+    Validate_Required_Env_Values \
+        "$TRANSMISSION_ENV_FILE" \
+        "Transmission + Gluetun" \
+        PROTON_VPN_USER PROTON_VPN_PASS DESIRED_TRANSMISSION_USER DESIRED_TRANSMISSION_PASS
+}
 
-    show 2 "Checking credentials in $ENV_FILE..."
+Validate_Foundry_Creds() {
+    show 2 "Checking FoundryVTT credentials in $FOUNDRY_ENV_FILE..."
+    Validate_Required_Env_Values \
+        "$FOUNDRY_ENV_FILE" \
+        "FoundryVTT" \
+        FOUNDRY_USERNAME FOUNDRY_PASSWORD FOUNDRY_ADMIN_KEY
+}
 
-    if [ ! -f "$ENV_FILE" ]; then
-        show 1 "Error: Credentials file '$ENV_FILE' not found. It should have been included in the repository."
+Validate_Tailscale_Creds() {
+    show 2 "Checking Tailscale credentials in $TAILSCALE_ENV_FILE..."
+    Validate_Required_Env_Values \
+        "$TAILSCALE_ENV_FILE" \
+        "Tailscale" \
+        TS_AUTHKEY TS_HOSTNAME
+}
+
+Validate_Required_Env_Values() {
+    local env_file="$1"
+    local env_name="$2"
+    shift 2
+
+    local required_vars=("$@")
+    local missing=()
+    local var_name
+
+    if [[ ! -f "$env_file" ]]; then
+        show 1 "Required env file '$env_file' not found for $env_name."
     fi
 
-    source "$ENV_FILE"
+    # shellcheck disable=SC1090
+    source "$env_file"
 
-    if [[ -z "$PROTON_VPN_USER" || -z "$PROTON_VPN_PASS" || -z "$DESIRED_TRANSMISSION_USER" || -z "$DESIRED_TRANSMISSION_PASS" ]]; then
-        show 1 "Some required credentials are missing or empty in '$ENV_FILE'. Please complete the .env file before rerunning the install script."
-    else
-        show 0 "All required credentials found in the .env file."
+    for var_name in "${required_vars[@]}"; do
+        if [[ -z "${!var_name:-}" ]]; then
+            missing+=("$var_name")
+        fi
+    done
+
+    if (( ${#missing[@]} > 0 )); then
+        show 1 "Missing required values in '$env_file' for $env_name: ${missing[*]}"
     fi
+
+    show 0 "$env_name env values look good."
+}
+
+Validate_Default_Stack_Creds() {
+    Validate_Transmission_Creds
+    Validate_Foundry_Creds
+    Validate_Tailscale_Creds
 }
 
 Handle_Dashy_IP_Config() {
     HOST_IP=$(ip -4 addr show | awk '/inet/ && $2 !~ /^127/ {print $2}' | cut -d/ -f1 | head -n1)
-    DASHY_TEMPLATE="./docker/dashy/app/user-data/conf.yml.template"
-    DASHY_CONF="./docker/dashy/app/user-data/conf.yml"
+    DASHY_TEMPLATE="$REPO_ROOT/docker/dashy/app/user-data/conf.yml.template"
+    DASHY_CONF="$REPO_ROOT/docker/dashy/app/user-data/conf.yml"
 
     show 2 "Updating Dashy IP configuration with IP: $HOST_IP..."
 
@@ -304,4 +354,31 @@ Handle_Dashy_IP_Config() {
     else
         show 1 "Template file $DASHY_TEMPLATE not found"
     fi
+}
+
+Install_Gluetun_Port_Watcher_Service() {
+    local service_template="$REPO_ROOT/scripts/services/watch-gluetun-port.service"
+    local service_target="/etc/systemd/system/watch-gluetun-port.service"
+    local install_user="${SUDO_USER:-$USER}"
+    local repo_root_escaped
+
+    if [[ ! -f "$service_template" ]]; then
+        show 1 "Service template '$service_template' not found."
+    fi
+
+    show 2 "Installing watch-gluetun-port systemd service..."
+
+    repo_root_escaped=$(printf '%s\n' "$REPO_ROOT" | sed 's/[&]/\\&/g')
+
+    GreyStart
+    sed \
+        -e "s|__INSTALL_USER__|$install_user|g" \
+        -e "s|__REPO_ROOT__|$repo_root_escaped|g" \
+        "$service_template" | sudo tee "$service_target" >/dev/null
+    sudo systemctl daemon-reload
+    sudo systemctl enable watch-gluetun-port
+    sudo systemctl restart watch-gluetun-port
+    ColorReset
+
+    show 0 "watch-gluetun-port service installed and running."
 }
