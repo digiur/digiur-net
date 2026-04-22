@@ -83,7 +83,7 @@ sudo setfacl -d -m mask::rwx /storage
 Create media folders:
 
 ```bash
-mkdir -p /storage/media/downloads /storage/media/downloads/raw /storage/tv /storage/movies
+mkdir -p /storage/media/downloads /storage/media/downloads/raw /storage/tv /storage/movies /storage/roms
 ```
 
 ## 3) Quick Setup
@@ -102,13 +102,16 @@ What quickstart does:
   - `docker/transmission-plus-gluetun/.env.template`
   - `docker/foundryvtt/.env.template`
   - `docker/tailscale/.env.template`
+  - `docker/romm/.env.template`
 - Prompts you to complete missing values for:
-  - Transmission + Gluetun credentials
-  - Foundry account credentials + admin key
-  - Tailscale auth key + hostname
+  - Transmission + Gluetun credentials + Transmission password
+  - Foundry account credentials
+  - Tailscale auth key
+  - RomM IGDB credentials
+- Leaves generated values to `scripts/install.sh`, including the Transmission username, Tailscale hostname, Foundry admin key, LibreSpeed admin password, RomM internal secrets, and Mealie base URL in each service-local `.env` where needed.
 - Runs `scripts/install.sh`.
 
-Plain `.env` files are local runtime secrets and are intentionally not tracked by git.
+Plain `.env` files are local runtime config/secrets and are intentionally not tracked by git.
 
 If docker group membership is newly added, log out/in once, then rerun:
 
@@ -123,8 +126,10 @@ If docker group membership is newly added, log out/in once, then rerun:
 - Resizes swap based on available disk/memory.
 - Installs dependencies (including `inotify-tools`).
 - Installs/verifies Docker.
-- Validates Transmission/Gluetun, Foundry, and Tailscale env values.
-- Generates Dashy config from `conf.yml.template` with host IP.
+- Generates service-local env values and prints where they were written.
+- Validates Transmission/Gluetun, Foundry, Tailscale, and RomM external credentials.
+- Fails fast if `/storage` or required storage subdirectories are missing.
+- Generates Dashy config from `conf.yml.template` only when needed, preserving existing custom config.
 - Starts/updates default active services idempotently.
 - Installs and starts `watch-gluetun-port.service` automatically.
 
@@ -142,7 +147,81 @@ Tail logs:
 journalctl -f -u watch-gluetun-port
 ```
 
-## 6) Optional Snapshot Rollback Workflow
+## 6) Smoke Checks
+
+Run these after storage setup and after `scripts/install.sh` completes.
+
+### Storage / ZFS
+
+Confirm the pool is healthy and compression is enabled:
+
+```bash
+sudo zpool status storage
+sudo zfs get compression,compressratio,mountpoint storage
+sudo zfs list storage
+```
+
+### Docker / Compose
+
+Confirm the default stack is running:
+
+```bash
+docker ps
+```
+
+Validate a service compose file resolves correctly:
+
+```bash
+cd docker/transmission-plus-gluetun
+docker compose config >/dev/null
+```
+
+### Dashy / App Reachability
+
+Check that the main web UIs are answering on the host:
+
+```bash
+curl -I http://<host-ip>
+curl -I http://<host-ip>:8096
+curl -I http://<host-ip>:9925
+curl -I http://<host-ip>:1337
+curl -I http://<host-ip>:30000
+```
+
+### Transmission + Gluetun
+
+Confirm both containers are up and Transmission responds:
+
+```bash
+cd docker/transmission-plus-gluetun
+docker compose ps
+docker logs gluetun --tail 50
+docker exec transmissionplus transmission-remote -n "transmission:<your-password>" --session-info
+```
+
+### Tailscale
+
+Confirm the node joined the tailnet:
+
+```bash
+cd docker/tailscale
+docker compose ps
+docker logs tailscale --tail 50
+docker exec tailscale tailscale status
+```
+
+### RomM
+
+Confirm both the app and database are healthy enough to stay running:
+
+```bash
+cd docker/romm
+docker compose ps
+docker logs romm --tail 50
+docker logs romm-db --tail 50
+```
+
+## 7) Optional Snapshot Rollback Workflow
 
 Snapshots are for **rollback checkpoints**, not disaster recovery.
 
@@ -161,7 +240,7 @@ sudo lvcreate --snapshot --size 20G --name pre-change-$(date +%Y%m%d) /dev/ubunt
 
 Restore is destructive and should be done only with explicit maintenance downtime.
 
-## 7) FoundryVTT (Default Service)
+## 8) FoundryVTT (Default Service)
 
 Foundry is part of the default install and is started automatically.
 
@@ -174,13 +253,16 @@ Required value:
 
 - `FOUNDRY_USERNAME`
 - `FOUNDRY_PASSWORD`
+
+Generated during install:
+
 - `FOUNDRY_ADMIN_KEY`
 
 Access:
 
 - `http://<host-ip>:30000`
 
-## 8) Tailscale Remote Access (Default Service)
+## 9) Tailscale Remote Access (Default Service)
 
 Tailscale is part of the default install and is started automatically.
 
@@ -192,6 +274,9 @@ Config files:
 Required value:
 
 - `TS_AUTHKEY`
+
+Generated during install:
+
 - `TS_HOSTNAME`
 
 Goal:
@@ -199,7 +284,31 @@ Goal:
 - Keep app services LAN-only.
 - Reach them remotely through VPN instead of exposing app ports directly to WAN.
 
-## 9) First-Time App Configuration Notes
+## 10) RomM (Default Service)
+
+RomM is part of the default install and is started automatically.
+
+Config files:
+
+- `docker/romm/docker-compose.yml`
+- `docker/romm/.env` (created from `.env.template` by quickstart if missing)
+
+Required value:
+
+- `IGDB_CLIENT_ID`
+- `IGDB_CLIENT_SECRET`
+
+Generated during install:
+
+- `ROMM_AUTH_SECRET_KEY`
+- `ROMM_DB_PASSWORD`
+- `ROMM_DB_ROOT_PASSWORD`
+
+Default library path:
+
+- `/storage/roms`
+
+## 11) First-Time App Configuration Notes
 
 ### Prowlarr
 
@@ -223,12 +332,13 @@ Goal:
 
 - Add libraries from `/storage`.
 
-## 10) Useful Commands
+## 12) Useful Commands
 
 Bring up a service:
 
 ```bash
-docker compose -f docker/<service>/docker-compose.yml up -d
+cd docker/<service>
+docker compose up -d
 ```
 
 Check container status:
@@ -240,5 +350,6 @@ docker ps
 View logs:
 
 ```bash
-docker compose -f docker/<service>/docker-compose.yml logs -f
+cd docker/<service>
+docker compose logs -f
 ```

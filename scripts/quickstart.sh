@@ -145,29 +145,40 @@ FOUNDRY_ENV_FILE="$REPO_DIR_ABS/docker/foundryvtt/.env"
 FOUNDRY_ENV_TEMPLATE="$REPO_DIR_ABS/docker/foundryvtt/.env.template"
 TAILSCALE_ENV_FILE="$REPO_DIR_ABS/docker/tailscale/.env"
 TAILSCALE_ENV_TEMPLATE="$REPO_DIR_ABS/docker/tailscale/.env.template"
+ROMM_ENV_FILE="$REPO_DIR_ABS/docker/romm/.env"
+ROMM_ENV_TEMPLATE="$REPO_DIR_ABS/docker/romm/.env.template"
 
 log_section "Preparing default stack env files"
 ensure_env_file_from_template "$TRANSMISSION_ENV_FILE" "$TRANSMISSION_ENV_TEMPLATE"
 ensure_env_file_from_template "$FOUNDRY_ENV_FILE" "$FOUNDRY_ENV_TEMPLATE"
 ensure_env_file_from_template "$TAILSCALE_ENV_FILE" "$TAILSCALE_ENV_TEMPLATE"
+ensure_env_file_from_template "$ROMM_ENV_FILE" "$ROMM_ENV_TEMPLATE"
 
 log_section "Configuring Transmission + Gluetun"
 validate_env_values \
     "$TRANSMISSION_ENV_FILE" \
     "Transmission + Gluetun" \
-    PROTON_VPN_USER PROTON_VPN_PASS DESIRED_TRANSMISSION_USER DESIRED_TRANSMISSION_PASS
+    PROTON_VPN_USER PROTON_VPN_PASS DESIRED_TRANSMISSION_PASS
 
 log_section "Configuring FoundryVTT"
 validate_env_values \
     "$FOUNDRY_ENV_FILE" \
     "FoundryVTT" \
-    FOUNDRY_USERNAME FOUNDRY_PASSWORD FOUNDRY_ADMIN_KEY
+    FOUNDRY_USERNAME FOUNDRY_PASSWORD
 
 log_section "Configuring Tailscale"
 validate_env_values \
     "$TAILSCALE_ENV_FILE" \
     "Tailscale" \
-    TS_AUTHKEY TS_HOSTNAME
+    TS_AUTHKEY
+
+log_section "Configuring RomM"
+validate_env_values \
+    "$ROMM_ENV_FILE" \
+    "RomM" \
+    IGDB_CLIENT_ID IGDB_CLIENT_SECRET
+
+log "Install will generate service-local defaults like the Transmission username, Tailscale hostname, Foundry admin key, LibreSpeed admin password, and RomM internal secrets."
 
 log_date
 

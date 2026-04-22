@@ -10,7 +10,7 @@ services:
       PUID: 1000
       PGID: 1000
       TZ: America/Denver
-      PASSWORD: password
+      PASSWORD: ${LIBRESPEED_PASSWORD}
 
     volumes:
       - ./config:/config

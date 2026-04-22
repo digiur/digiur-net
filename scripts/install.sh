@@ -43,8 +43,14 @@ show 0 "Docker installation check passed...."
 # Step 3: Set up digiur-net
 show_time
 show 2 "Step 3: Set up digiur-net"
+Generate_Default_Env_Files || show 1 "Failed to prepare service env files"
+show 0 "Service env files prepared..."
+
 Validate_Default_Stack_Creds || show 1 "Failed to validate default stack credentials"
 show 0 "Default stack credentials validated..."
+
+Validate_Preconditions || show 1 "Failed preflight checks"
+show 0 "Preflight checks passed..."
 
 Handle_Dashy_IP_Config || show 1 "Failed to update Dashy IPs"
 show 0 "Injected host IP into Dashy config..."
@@ -54,6 +60,8 @@ show 0 "Digiur-net setup completed successfully..."
 
 Install_Gluetun_Port_Watcher_Service || show 1 "Failed to install watch-gluetun-port service"
 show 0 "watch-gluetun-port service configured..."
+
+Show_Config_File_Summary || show 1 "Failed to display config file summary"
 
 Welcome_Banner || show 1 "Failed to display welcome banner"
 

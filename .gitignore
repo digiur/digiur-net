@@ -15,4 +15,5 @@ docker/**
 !docker/transmission-plus-gluetun/.env.template
 !docker/foundryvtt/.env.template
 !docker/tailscale/.env.template
+!docker/romm/.env.template
 !docker/dashy/app/user-data/conf.yml.template
