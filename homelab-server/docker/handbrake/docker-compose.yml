@@ -13,6 +13,7 @@ services:
       AUTOMATED_CONVERSION_NON_VIDEO_FILE_ACTION: copy
       AUTOMATED_CONVERSION_OVERWRITE_OUTPUT: 1
       AUTOMATED_CONVERSION_SOURCE_STABLE_TIME: 7
+      AUTOMATED_CONVERSION_KEEP_SOURCE: 0
 
     devices:
       - /dev/dri:/dev/dri
@@ -22,8 +23,7 @@ services:
 
     volumes:
       - ./config:/config
-      - /storage/media:/output
-      - /storage/media/downloads/raw:/watch
-      - /storage:/storage
+      - /storage/downloads/processing:/watch
+      - /mnt/nas:/output
 
     restart: unless-stopped

@@ -16,6 +16,6 @@ services:
 
     volumes:
       - ./config:/config
-      - /storage:/storage
+      - /storage/downloads:/storage/downloads
 
     restart: unless-stopped

@@ -21,7 +21,7 @@ services:
     volumes:
       - ./transmission/config:/config
       - ./watch:/watch
-      - /storage/media/downloads:/storage/media/downloads
+      - /storage/downloads/raw:/storage/downloads/raw
 
     environment:
       # The following placeholders are filled in by scripts/deploy.sh.
@@ -31,6 +31,8 @@ services:
       PGID: 1000
       PUID: 1000
       TZ: America/Denver
+      # Written into settings.json on every container start, keeping it in sync with the volume mount above
+      TRANSMISSION_DOWNLOAD_DIR: /storage/downloads/raw
 
     restart: unless-stopped
 
