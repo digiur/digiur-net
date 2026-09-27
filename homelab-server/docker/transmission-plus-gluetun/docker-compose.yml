@@ -24,8 +24,8 @@ services:
       - /storage/media/downloads:/storage/media/downloads
 
     environment:
-      # The following placeholders are replaced with real credentials by install.sh
-      # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
+      # The following placeholders are filled in by scripts/deploy.sh.
+      # Do not edit these directly. Instead, fill in ./.env and rerun deploy.sh.
       USER: ${DESIRED_TRANSMISSION_USER}
       PASS: ${DESIRED_TRANSMISSION_PASS}
       PGID: 1000
@@ -61,8 +61,8 @@ services:
       - ./gluetun:/gluetun
 
     environment:
-      # The following placeholders are replaced with real credentials by install.sh
-      # Do not edit these directly. Instead, fill in ./transmission+gluetun.env and run install.sh.
+      # The following placeholders are filled in by scripts/deploy.sh.
+      # Do not edit these directly. Instead, fill in ./.env and rerun deploy.sh.
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
       - OPENVPN_USER=${PROTON_VPN_USER}

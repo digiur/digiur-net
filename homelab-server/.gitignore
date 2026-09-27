@@ -1,4 +1,4 @@
-install_log.txt
+digiur-net.log
 
 # Ignore runtime/generated files in docker by default
 docker/**
@@ -10,8 +10,6 @@ docker/**
 !docker/**/docker-compose.yml
 
 # Explicitly track templates/docs needed for first-time setup
-!docker/transmission-plus-gluetun/transmission.env
-!docker/transmission-plus-gluetun.env
 !docker/transmission-plus-gluetun/.env.template
 !docker/foundryvtt/.env.template
 !docker/tailscale/.env.template

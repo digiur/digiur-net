@@ -1,4 +1,4 @@
-# Services installed by default by scripts/install.sh
+# Services deployed by scripts/deploy.sh
 # One service name per line, matching docker/<name>/docker-compose.yml
 
 dashy
