@@ -2,7 +2,7 @@
 name: qdirstat
 services:
   qdirstat:
-    image: lscr.io/linuxserver/qdirstat
+    image: linuxserver/qdirstat
     cpu_shares: 1024
     container_name: qdirstat
 
@@ -10,9 +10,13 @@ services:
       PUID: 1000
       PGID: 1000
       TZ: America/Denver
+      CUSTOM_USER: admin
+      PASSWORD: ${QDIRSTAT_PASSWORD}
 
     ports:
-      - 3000:3000
+      - 3001:3001
+
+    shm_size: "1gb"
 
     volumes:
       - /opt/digiur-net/qdirstat/config:/config

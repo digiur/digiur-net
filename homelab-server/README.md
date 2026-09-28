@@ -307,14 +307,6 @@ cd docker/portainer && docker compose up -d && cd ../..
 
 Verify: `curl -I http://<host-ip>:9000`
 
-**qdirstat** — disk usage viewer:
-
-```bash
-cd docker/qdirstat && docker compose up -d && cd ../..
-```
-
-Verify: `curl -I http://<host-ip>:3000`
-
 **myspeed** — speed test history:
 
 ```bash
@@ -364,6 +356,18 @@ cd ../..
 ```
 
 Verify: `curl -I http://<host-ip>:81`. Password is in `docker/librespeed/.env` if you need it later.
+
+**qdirstat** — disk usage viewer with full read-only access to the host filesystem. As of the 2025 Selkies rebase it's a full streamed desktop requiring HTTPS, so it needs a login:
+
+```bash
+cd docker/qdirstat
+cp .env.template .env
+sed -i "s|^QDIRSTAT_PASSWORD=.*|QDIRSTAT_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)|" .env
+docker compose up -d
+cd ../..
+```
+
+Verify: `curl -Ik https://<host-ip>:3001` (self-signed cert, hence `-k`). Log in with user `admin` and the password from `docker/qdirstat/.env`.
 
 **Prowlarr, Sonarr, Radarr** — no secrets, but need in-app configuration (indexers, root folders, download client) once all three plus Transmission are up — see section 12:
 

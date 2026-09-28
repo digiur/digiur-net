@@ -2,12 +2,12 @@
 name: portainer
 services:
   portainer:
-    image: portainer/portainer-ce
+    image: portainer/portainer-ce:lts
     cpu_shares: 1024
     container_name: portainer
 
     ports:
-      - 9000:9000
+      - 9443:9443
 
     volumes:
       - /opt/digiur-net/portainer/data:/data

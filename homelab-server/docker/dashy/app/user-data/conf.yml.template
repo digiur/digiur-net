@@ -74,7 +74,7 @@ sections:
 
   - title: Portainer
     description: Docker Manager
-    url: http://{{HOST_IP}}:9000
+    url: http://{{HOST_IP}}:9443
 
   - title: Prowl-arr!
     description: Torrent Indexer Search
