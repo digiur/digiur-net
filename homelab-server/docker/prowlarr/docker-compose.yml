@@ -2,7 +2,7 @@
 name: prowlarr
 services:
   prowlarr:
-    image: linuxserver/prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
     cpu_shares: 1024
     container_name: prowlarr
 

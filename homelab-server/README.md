@@ -334,7 +334,7 @@ No manually-supplied secrets, but need a generated value or later in-app configu
 ```bash
 cd docker/mealie
 cp .env.template .env
-sed -i "s|^MEALIE_BASE_URL=.*|MEALIE_BASE_URL=http://<host-ip>:9925|" .env
+nano .env
 docker compose up -d
 cd ../..
 ```
@@ -346,7 +346,7 @@ Verify: `curl -I http://<host-ip>:9925`
 ```bash
 cd docker/librespeed
 cp .env.template .env
-sed -i "s|^LIBRESPEED_PASSWORD=.*|LIBRESPEED_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)|" .env
+nano .env
 docker compose up -d
 cd ../..
 ```
@@ -380,9 +380,7 @@ Verify: `curl -I http://<host-ip>:8096`. Add libraries once the NAS has media �
 **Prowlarr, Sonarr, Radarr** — no secrets, but need in-app configuration (indexers, root folders, download client) once all three plus Transmission are up — see section 12:
 
 ```bash
-cd docker/prowlarr && docker compose up -d && cd ../..
-cd docker/sonarr && docker compose up -d && cd ../..
-cd docker/radarr && docker compose up -d && cd ../..
+cd docker/prowlarr && docker compose up -d && cd ../.. && cd docker/sonarr && docker compose up -d && cd ../.. && cd docker/radarr && docker compose up -d && cd ../..
 ```
 
 Verify: `curl -I http://<host-ip>:9696`, `:8989`, `:7878`.
