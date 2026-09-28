@@ -2,7 +2,7 @@
 name: mealie
 services:
   mealie:
-    image: ghcr.io/mealie-recipes/mealie
+    image: ghcr.io/mealie-recipes/mealie:latest
     cpu_shares: 1024
     container_name: mealie
 
@@ -11,6 +11,12 @@ services:
       PGID: 1000
       TZ: America/Denver
       BASE_URL: ${MEALIE_BASE_URL}
+      ALLOW_SIGNUP: "false"
+
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
 
     ports:
       - 9925:9000

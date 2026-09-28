@@ -333,7 +333,8 @@ No manually-supplied secrets, but need a generated value or later in-app configu
 
 ```bash
 cd docker/mealie
-echo "MEALIE_BASE_URL=http://<host-ip>:9925" > .env
+cp .env.template .env
+sed -i "s|^MEALIE_BASE_URL=.*|MEALIE_BASE_URL=http://<host-ip>:9925|" .env
 docker compose up -d
 cd ../..
 ```
