@@ -2,7 +2,7 @@
 name: jellyfin
 services:
   jellyfin:
-    image: linuxserver/jellyfin
+    image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     cpu_shares: 2048
 
@@ -10,12 +10,13 @@ services:
       PGID: 1000
       PUID: 1000
       TZ: America/Denver
+      JELLYFIN_PublishedServerUrl: ${JELLYFIN_PUBLISHED_SERVER_URL}
 
     ports:
       - 8096:8096
-      - 8920:8921
-      - 7359:7359
-      - 1900:1901
+      - 8920:8920
+      - 7359:7359/udp
+      - 1900:1900/udp
 
     volumes:
       - /opt/digiur-net/jellyfin/config:/config

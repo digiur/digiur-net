@@ -315,14 +315,6 @@ cd docker/myspeed && docker compose up -d && cd ../..
 
 Verify: `curl -I http://<host-ip>:5216`
 
-**Jellyfin** — media server (GPU passthrough already confirmed via `/dev/dri` earlier):
-
-```bash
-cd docker/jellyfin && docker compose up -d && cd ../..
-```
-
-Verify: `curl -I http://<host-ip>:8096`. Add libraries once the NAS has media — see section 12.
-
 **HandBrake** — auto-transcode watcher (GPU passthrough already confirmed):
 
 ```bash
@@ -368,6 +360,18 @@ cd ../..
 ```
 
 Verify: `curl -Ik https://<host-ip>:3001` (self-signed cert, hence `-k`). Log in with user `admin` and the password from `docker/qdirstat/.env`.
+
+**Jellyfin** — media server (GPU passthrough already confirmed via `/dev/dri` earlier):
+
+```bash
+cd docker/jellyfin
+cp .env.template .env
+sed -i "s|^JELLYFIN_PUBLISHED_SERVER_URL=.*|JELLYFIN_PUBLISHED_SERVER_URL=http://<host-ip>|" .env
+docker compose up -d
+cd ../..
+```
+
+Verify: `curl -I http://<host-ip>:8096`. Add libraries once the NAS has media — see section 12.
 
 **Prowlarr, Sonarr, Radarr** — no secrets, but need in-app configuration (indexers, root folders, download client) once all three plus Transmission are up — see section 12:
 

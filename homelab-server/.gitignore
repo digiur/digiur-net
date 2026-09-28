@@ -15,4 +15,5 @@ docker/**
 !docker/tailscale/.env.template
 !docker/romm/.env.template
 !docker/qdirstat/.env.template
+!docker/jellyfin/.env.template
 !docker/dashy/app/user-data/conf.yml.template
