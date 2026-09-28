@@ -202,6 +202,21 @@ These are created on the server side through the NFS mount, which requires write
 
 These are manual steps, done once on a fresh host (or individually re-done any time the thing they cover changes — new drive, moved repo, etc). They depend on the physical machine, so they're documentation, not scripts.
 
+### App data directory
+
+All service configs and databases live under `/opt/digiur-net`, independent of this repo checkout — re-cloning or wiping the repo never touches running app data.
+
+```bash
+sudo mkdir -p /opt/digiur-net
+sudo chown 1000:1000 /opt/digiur-net
+sudo chmod g+s /opt/digiur-net
+sudo setfacl -m group:1000:rwx /opt/digiur-net
+sudo setfacl -d -m group:1000:rwx /opt/digiur-net
+sudo setfacl -d -m mask::rwx /opt/digiur-net
+```
+
+Same pattern as the `/storage` setup above: the setgid bit and default ACLs mean any subdirectory created later — whether by you running `mkdir`, or by Docker auto-creating a missing bind-mount path — automatically gets group `1000` with read/write/execute, regardless of who created it. No need to pre-create or `chown` each service's subdirectory individually; just deploy each service one at a time and let Docker create its own path under `/opt/digiur-net/<service>/...` on first `docker compose up -d`.
+
 ### Verify preconditions
 
 ```bash
@@ -270,9 +285,10 @@ hostname -I
 Deploy first, since it links out to every other service:
 
 ```bash
+mkdir -p /opt/digiur-net/dashy/user-data
+cp docker/dashy/app/user-data/conf.yml.template /opt/digiur-net/dashy/user-data/conf.yml
+sed -i "s|{{HOST_IP}}|10.0.20.10|g" /opt/digiur-net/dashy/user-data/conf.yml
 cd docker/dashy
-cp app/user-data/conf.yml.template app/user-data/conf.yml
-sed -i "s|{{HOST_IP}}|<host-ip>|g" app/user-data/conf.yml
 docker compose up -d
 cd ../..
 ```
@@ -522,11 +538,11 @@ docker logs romm-db --tail 50
 
 ## 8) Rollback Strategy
 
-With ext4 on the OS drive, you don't have snapshots. That's fine — the homelab stack is intentionally stateless (config and data live elsewhere). If OS-level changes break something:
+With ext4 on the OS drive, you don't have snapshots. App config and data live under `/opt/digiur-net`, separate from this repo checkout, so re-cloning or wiping the repo never touches running app state. That data is still on the OS drive, though — a full OS reinstall wipes it along with everything else, so back up `/opt/digiur-net` first if you want to keep it. If OS-level changes break something:
 
 - Docker containers are replaceable.
-- `/storage` and `/mnt/nas` are independent.
-- Worst case: reinstall the OS from scratch (takes 15 minutes).
+- `/storage` and `/mnt/nas` are independent of the OS drive.
+- Worst case: reinstall the OS from scratch (takes 15 minutes) — but restore `/opt/digiur-net` from backup afterward if you want to keep existing app state.
 
 If you want a safety net before major changes (kernel updates, Docker upgrades), use `dd` or `pv` to image the NVMe to a USB stick beforehand — clunky but effective.
 

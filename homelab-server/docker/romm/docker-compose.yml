@@ -22,11 +22,11 @@ services:
       TZ: America/Denver
 
     volumes:
-      - ./romm/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
+      - /opt/digiur-net/romm/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
       - romm_redis_data:/redis-data # Cached data for background tasks
       - /mnt/nas/roms:/romm/library # Your game library
-      - ./romm/assets:/romm/assets # Uploaded saves, states, etc.
-      - ./romm/config:/romm/config # Path where config.yml is stored
+      - /opt/digiur-net/romm/assets:/romm/assets # Uploaded saves, states, etc.
+      - /opt/digiur-net/romm/config:/romm/config # Path where config.yml is stored
 
     ports:
       - 1337:8080
@@ -44,4 +44,4 @@ services:
       - MYSQL_USER=romm-user
       - MYSQL_PASSWORD=${ROMM_DB_PASSWORD}
     volumes:
-      - ./var/lib/mysql:/var/lib/mysql
+      - /opt/digiur-net/romm/db:/var/lib/mysql

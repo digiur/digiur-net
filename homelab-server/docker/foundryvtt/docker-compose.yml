@@ -19,6 +19,6 @@ services:
       - 30000:30000/tcp
 
     volumes:
-      - ./data:/data
+      - /opt/digiur-net/foundryvtt/data:/data
 
     restart: unless-stopped

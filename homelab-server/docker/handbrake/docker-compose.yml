@@ -22,7 +22,7 @@ services:
       - 5800:5800
 
     volumes:
-      - ./config:/config
+      - /opt/digiur-net/handbrake/config:/config
       - /storage/downloads/processing:/watch
       - /mnt/nas:/output
 

@@ -15,7 +15,7 @@ services:
       - 3000:3000
 
     volumes:
-      - ./config:/config
+      - /opt/digiur-net/qdirstat/config:/config
       - /:/data:ro
 
     restart: unless-stopped

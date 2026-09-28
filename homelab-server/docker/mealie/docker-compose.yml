@@ -16,6 +16,6 @@ services:
       - 9925:9000
 
     volumes:
-      - ./app/data:/app/data
+      - /opt/digiur-net/mealie/data:/app/data
 
     restart: unless-stopped

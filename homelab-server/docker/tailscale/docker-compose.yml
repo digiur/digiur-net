@@ -16,7 +16,7 @@ services:
       - /dev/net/tun:/dev/net/tun
 
     volumes:
-      - ./state:/var/lib/tailscale
+      - /opt/digiur-net/tailscale/state:/var/lib/tailscale
 
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}

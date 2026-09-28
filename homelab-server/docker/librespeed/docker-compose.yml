@@ -13,7 +13,7 @@ services:
       PASSWORD: ${LIBRESPEED_PASSWORD}
 
     volumes:
-      - ./config:/config
+      - /opt/digiur-net/librespeed/config:/config
 
     ports:
       - 81:80

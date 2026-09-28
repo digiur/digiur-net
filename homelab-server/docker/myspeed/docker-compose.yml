@@ -10,6 +10,6 @@ services:
       - 5216:5216
 
     volumes:
-      - ./myspeed/data:/myspeed/data
+      - /opt/digiur-net/myspeed/data:/myspeed/data
 
     restart: unless-stopped

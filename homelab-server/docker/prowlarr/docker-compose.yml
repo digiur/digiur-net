@@ -15,6 +15,6 @@ services:
       - 9696:9696
 
     volumes:
-      - ./config:/config
+      - /opt/digiur-net/prowlarr/config:/config
 
     restart: unless-stopped

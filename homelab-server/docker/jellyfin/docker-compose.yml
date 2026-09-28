@@ -18,7 +18,7 @@ services:
       - 1900:1901
 
     volumes:
-      - ./config:/config
+      - /opt/digiur-net/jellyfin/config:/config
       - /mnt/nas:/mnt/nas
 
     devices:
