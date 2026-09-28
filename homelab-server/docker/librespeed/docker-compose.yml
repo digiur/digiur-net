@@ -2,7 +2,7 @@
 name: librespeed
 services:
   librespeed:
-    image: lscr.io/linuxserver/librespeed
+    image: lscr.io/linuxserver/librespeed:latest
     cpu_shares: 1024
     container_name: librespeed
 

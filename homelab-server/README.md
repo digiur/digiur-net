@@ -345,7 +345,8 @@ Verify: `curl -I http://<host-ip>:9925`
 
 ```bash
 cd docker/librespeed
-echo "LIBRESPEED_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)" > .env
+cp .env.template .env
+sed -i "s|^LIBRESPEED_PASSWORD=.*|LIBRESPEED_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)|" .env
 docker compose up -d
 cd ../..
 ```

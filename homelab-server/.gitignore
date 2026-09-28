@@ -17,4 +17,5 @@ docker/**
 !docker/qdirstat/.env.template
 !docker/jellyfin/.env.template
 !docker/mealie/.env.template
+!docker/librespeed/.env.template
 !docker/dashy/app/user-data/conf.yml.template
