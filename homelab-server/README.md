@@ -362,7 +362,7 @@ Verify: `curl -I http://<host-ip>:81`. Password is in `docker/librespeed/.env` i
 ```bash
 cd docker/qdirstat
 cp .env.template .env
-sed -i "s|^QDIRSTAT_PASSWORD=.*|QDIRSTAT_PASSWORD=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 24)|" .env
+nano .env
 docker compose up -d
 cd ../..
 ```

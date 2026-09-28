@@ -82,7 +82,7 @@ sections:
 
   - title: QDirStat
     description: Disk usage analyzer
-    url: http://{{HOST_IP}}:3000
+    url: http://{{HOST_IP}}:3001
 
   - title: Rad-arr!
     description: Torrent Movie Search
