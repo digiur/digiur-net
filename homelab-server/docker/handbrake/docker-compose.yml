@@ -7,13 +7,8 @@ services:
     cpu_shares: 512
     environment:
       USER_ID: 1000
-      AUTOMATED_CONVERSION_PRESET: "General/H.265 QSV 720p"
-      AUTOMATED_CONVERSION_OUTPUT_SUBDIR: SAME_AS_SRC
-      AUTOMATED_CONVERSION_FORMAT: m4v
-      AUTOMATED_CONVERSION_NON_VIDEO_FILE_ACTION: copy
-      AUTOMATED_CONVERSION_OVERWRITE_OUTPUT: 1
-      AUTOMATED_CONVERSION_SOURCE_STABLE_TIME: 7
-      AUTOMATED_CONVERSION_KEEP_SOURCE: 0
+      GROUP_ID: 1000
+      AUTOMATED_CONVERSION: 0
 
     devices:
       - /dev/dri:/dev/dri
@@ -23,6 +18,7 @@ services:
 
     volumes:
       - /opt/digiur-net/handbrake/config:/config
+      - /storage:/storage:ro
       - /storage/downloads/processing:/watch
       - /mnt/nas:/output
 

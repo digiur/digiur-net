@@ -315,13 +315,15 @@ cd docker/myspeed && docker compose up -d && cd ../..
 
 Verify: `curl -I http://<host-ip>:5216`
 
-**HandBrake** — auto-transcode watcher (GPU passthrough already confirmed):
+**HandBrake** — manual transcoding via its web GUI (GPU passthrough already confirmed). Automated watch-folder conversion is disabled (`AUTOMATED_CONVERSION: 0`); browse and convert files yourself through the GUI, reading from the read-only `/storage` mount and saving to `/output` (`/mnt/nas`):
 
 ```bash
 cd docker/handbrake && docker compose up -d && cd ../..
 ```
 
-Verify: `curl -I http://<host-ip>:5800`. Nothing to transcode yet until Sonarr/Radarr/Transmission are feeding it files.
+Verify: `curl -I http://<host-ip>:5800`.
+
+Note: HandBrake's automated converter is a blind preset-apply with no library awareness. If you outgrow manual conversion, [Tdarr](https://docs.tdarr.io/) (library-aware, plugin-based, skips already-optimized files) or [Unmanic](https://docs.unmanic.app/) (lighter-weight equivalent) are purpose-built alternatives worth a look before automating this again.
 
 ### Services With Minor Setup
 
@@ -366,7 +368,7 @@ Verify: `curl -Ik https://<host-ip>:3001` (self-signed cert, hence `-k`). Log in
 ```bash
 cd docker/jellyfin
 cp .env.template .env
-sed -i "s|^JELLYFIN_PUBLISHED_SERVER_URL=.*|JELLYFIN_PUBLISHED_SERVER_URL=http://<host-ip>|" .env
+nano .env
 docker compose up -d
 cd ../..
 ```
@@ -632,13 +634,13 @@ Default library path:
 
 ### Sonarr
 
-- Set root folder: `/storage/downloads/processing/tv` (Sonarr renames/hardlinks here; HandBrake watches this path and writes the finished transcode to `/mnt/nas/tv`).
+- Set root folder: `/storage/downloads/processing/tv` (Sonarr renames/hardlinks here; manually transcode via HandBrake's GUI and save the finished file to `/mnt/nas/tv`).
 - Configure naming, hardlinks, and upgrade behavior.
 - Add Transmission download client.
 
 ### Radarr
 
-- Set root folder: `/storage/downloads/processing/movies` (same pattern — HandBrake writes the finished transcode to `/mnt/nas/movies`).
+- Set root folder: `/storage/downloads/processing/movies` (same pattern — manually transcode and save to `/mnt/nas/movies`).
 - Configure naming, hardlinks, and upgrade behavior.
 - Add Transmission download client.
 
