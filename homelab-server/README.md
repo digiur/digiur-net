@@ -428,8 +428,7 @@ journalctl -f -u watch-gluetun-port
 ```bash
 cd docker/foundryvtt
 cp .env.template .env
-nano .env   # fill in FOUNDRY_USERNAME, FOUNDRY_PASSWORD
-echo "FOUNDRY_ADMIN_KEY=$(openssl rand -hex 32)" >> .env
+nano .env   # fill in FOUNDRY_USERNAME, FOUNDRY_PASSWORD, FOUNDRY_ADMIN_KEY
 docker compose up -d
 cd ../..
 ```
