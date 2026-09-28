@@ -2,13 +2,11 @@
 name: foundryvtt
 services:
   foundryvtt:
-    image: felddy/foundryvtt:release
+    image: ghcr.io/felddy/foundryvtt:14
     container_name: foundryvtt
     hostname: foundryvtt
 
     environment:
-      - PUID=1000
-      - PGID=1000
       - TZ=America/Denver
       - FOUNDRY_USERNAME=${FOUNDRY_USERNAME}
       - FOUNDRY_PASSWORD=${FOUNDRY_PASSWORD}
