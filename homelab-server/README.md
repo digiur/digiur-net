@@ -394,13 +394,34 @@ These need real credentials before they'll start successfully — most config, d
 ```bash
 cd docker/transmission-plus-gluetun
 cp .env.template .env
-nano .env   # fill in DESIRED_TRANSMISSION_PASS, PROTON_VPN_USER, PROTON_VPN_PASS
-echo "DESIRED_TRANSMISSION_USER=transmission" >> .env
+nano .env   # fill in DESIRED_TRANSMISSION_USER/PASS, PROTON_VPN_USER (append +pmp, e.g. myusername+pmp), PROTON_VPN_PASS
 docker compose up -d
 cd ../..
 ```
 
 Verify: `docker compose ps` shows both containers running, then `curl -I http://<host-ip>:9091` (Transmission web UI, proxied through Gluetun).
+
+**Gluetun Port Watcher**:
+
+Run once the stack is up:
+
+```bash
+sudo cp docker/transmission-plus-gluetun/watch-gluetun-port.service /etc/systemd/system/watch-gluetun-port.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now watch-gluetun-port
+```
+
+Check service status:
+
+```bash
+sudo systemctl status watch-gluetun-port
+```
+
+Tail logs:
+
+```bash
+journalctl -f -u watch-gluetun-port
+```
 
 **FoundryVTT** — see section 9 for required values:
 
@@ -447,31 +468,6 @@ Plain `.env` files are local runtime config/secrets and are intentionally not tr
 
 Once every service above is verified working, `scripts/deploy.sh` automates this same flow (env prep + generated defaults + `docker compose up -d` for every active service) for repeatable day-2 deploys.
 
-## 6) Gluetun Port Watcher (only if running transmission-plus-gluetun)
-
-Run once the stack is up. Run from the `homelab-server` directory so `$(pwd)` resolves correctly. Rerun this if the repo is ever moved.
-
-```bash
-sudo sed \
-  -e "s|__INSTALL_USER__|$USER|g" \
-  -e "s|__REPO_ROOT__|$(pwd)|g" \
-  scripts/services/watch-gluetun-port.service | sudo tee /etc/systemd/system/watch-gluetun-port.service >/dev/null
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now watch-gluetun-port
-```
-
-Check service status:
-
-```bash
-sudo systemctl status watch-gluetun-port
-```
-
-Tail logs:
-
-```bash
-journalctl -f -u watch-gluetun-port
-```
 
 ## 7) Smoke Checks
 
@@ -625,6 +621,10 @@ Default library path:
 - `/mnt/nas/roms`
 
 ## 12) First-Time App Configuration Notes
+
+### Transmission
+
+- Set default download location: Settings -> Downloading -> "Save files to location" = `/storage/downloads/raw`. There is no environment variable for this — it must be set once in the web UI (it persists in `/config/settings.json`).
 
 ### Prowlarr
 

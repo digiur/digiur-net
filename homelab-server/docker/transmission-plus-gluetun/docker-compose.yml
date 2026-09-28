@@ -1,21 +1,19 @@
 # Transmission Plus Gluetun stack
-# This setup ensures Transmission can ONLY
-# access the internet through the VPN (Gluetun).
-# If Gluetun is stopped, Transmission has NO inetrnet access.
-# If Gluetun is running but not connected to the VPN,
-# Transmission's traffic will be routed through Gluetun,
-# but may be blocked or dropped by Gluetun's firewall.
-# This prevents leaks and enforces VPN-only usage.
+# Transmission shares Gluetun's network namespace, so it has no network path of
+# its own: if Gluetun is stopped, Transmission has no internet access at all.
+# Gluetun also runs a built-in kill-switch firewall that only allows traffic
+# through the VPN tunnel, to the VPN server, and to allowed LAN devices, so even
+# if the tunnel drops while Gluetun keeps running, traffic is blocked rather
+# than falling back to the raw connection.
 ---
 name: transmission-plus-gluetun
 services:
   transmissionplus:
-    image: linuxserver/transmission
+    image: lscr.io/linuxserver/transmission:latest
     cpu_shares: 2048
     container_name: transmissionplus
 
-    # All Transmission network traffic is routed through the Gluetun VPN container.
-    # This is enforced by network_mode: "service:gluetun"
+    # See header: shares Gluetun's network namespace, so this container has no network stack of its own.
     network_mode: "service:gluetun"
 
     volumes:
@@ -24,20 +22,19 @@ services:
       - /storage/downloads/raw:/storage/downloads/raw
 
     environment:
-      # The following placeholders are filled in by scripts/deploy.sh.
-      # Do not edit these directly. Instead, fill in ./.env and rerun deploy.sh.
+      # USER/PASS come from ./.env (see .env.template); deploy.sh only
+      # validates they're set, it won't fill them in for you.
       USER: ${DESIRED_TRANSMISSION_USER}
       PASS: ${DESIRED_TRANSMISSION_PASS}
       PGID: 1000
       PUID: 1000
       TZ: America/Denver
-      # Written into settings.json on every container start, keeping it in sync with the volume mount above
-      TRANSMISSION_DOWNLOAD_DIR: /storage/downloads/raw
 
     restart: unless-stopped
 
   gluetun:
-    image: qmcgaw/gluetun
+    # :latest tracks gluetun's unstable master branch; :v3 is the latest stable release line.
+    image: qmcgaw/gluetun:v3
     cpu_shares: 2048
     container_name: gluetun
 
@@ -48,28 +45,23 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun
 
-    # Only Gluetun exposes ports to the host. Transmission's web UI and peer
-    # ports are only available if Gluetun is up and connected. If Gluetun is
-    # running but not connected to the VPN, these ports may be unreachable or
-    # blocked by Gluetun's firewall. This prevents Transmission from ever using
-    # the host network directly.
+    # Only Gluetun exposes ports to the host - Transmission has none of its own.
     ports:
-      - 9001:9000/tcp
       - 9091:9091/tcp
-      - 60357:60357/tcp
-      - 60357:60357/udp
 
     volumes:
       - /opt/digiur-net/transmission-plus-gluetun/gluetun:/gluetun
 
     environment:
-      # The following placeholders are filled in by scripts/deploy.sh.
-      # Do not edit these directly. Instead, fill in ./.env and rerun deploy.sh.
+      # OPENVPN_USER/OPENVPN_PASSWORD come from ./.env (see .env.template);
+      # deploy.sh only validates they're set, it won't fill them in for you.
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
       - OPENVPN_USER=${PROTON_VPN_USER}
       - OPENVPN_PASSWORD=${PROTON_VPN_PASS}
+      # Restricts server selection to port-forwarding-capable servers (separate from VPN_PORT_FORWARDING below)
       - PORT_FORWARD_ONLY=on
+      # Requests the forwarded port; requires +pmp on OPENVPN_USER for ProtonVPN (see .env.template)
       - VPN_PORT_FORWARDING=on
       - SERVER_COUNTRIES=Switzerland
       - VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port

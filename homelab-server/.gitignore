@@ -19,3 +19,5 @@ docker/**
 !docker/mealie/.env.template
 !docker/librespeed/.env.template
 !docker/dashy/app/user-data/conf.yml.template
+!docker/transmission-plus-gluetun/watch-gluetun-port.sh
+!docker/transmission-plus-gluetun/watch-gluetun-port.service

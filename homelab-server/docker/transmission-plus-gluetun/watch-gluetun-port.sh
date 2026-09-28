@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_DIR="$REPO_ROOT/docker/transmission-plus-gluetun"
-FORWARD_DIR="$COMPOSE_DIR/gluetun"
+COMPOSE_DIR="/home/digiur/digiur-net/homelab-server/docker/transmission-plus-gluetun"
+FORWARD_DIR="/opt/digiur-net/transmission-plus-gluetun/gluetun"
 FORWARD_FILE="$FORWARD_DIR/forwarded_port"
 ENV_FILE="$COMPOSE_DIR/.env"
 

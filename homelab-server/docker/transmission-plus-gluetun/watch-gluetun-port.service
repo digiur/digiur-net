@@ -5,9 +5,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=__INSTALL_USER__
-WorkingDirectory=__REPO_ROOT__
-ExecStart=__REPO_ROOT__/scripts/watch-gluetun-port.sh
+User=digiur
+WorkingDirectory=/home/digiur/digiur-net/homelab-server/docker/transmission-plus-gluetun
+ExecStart=/home/digiur/digiur-net/homelab-server/docker/transmission-plus-gluetun/watch-gluetun-port.sh
 Restart=always
 RestartSec=5
 
