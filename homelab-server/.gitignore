@@ -21,3 +21,4 @@ docker/**
 !docker/dashy/app/user-data/conf.yml.template
 !docker/transmission-plus-gluetun/watch-gluetun-port.sh
 !docker/transmission-plus-gluetun/watch-gluetun-port.service
+!docker/cloudflared/.env.template

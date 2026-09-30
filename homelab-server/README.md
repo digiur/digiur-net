@@ -25,6 +25,7 @@ Current default set:
 - transmission-plus-gluetun
 - foundryvtt
 - tailscale
+- cloudflared
 
 Deprecated or experimental service stacks are kept under `docker/deprecated/` and are not part of the default install flow.
 
@@ -375,9 +376,9 @@ docker compose up -d
 cd ../..
 ```
 
-Verify: `curl -I http://<host-ip>:8096`. Add libraries once the NAS has media — see section 12.
+Verify: `curl -I http://<host-ip>:8096`. Add libraries once the NAS has media — see section 13.
 
-**Prowlarr, Sonarr, Radarr** — no secrets, but need in-app configuration (indexers, root folders, download client) once all three plus Transmission are up — see section 12:
+**Prowlarr, Sonarr, Radarr** — no secrets, but need in-app configuration (indexers, root folders, download client) once all three plus Transmission are up — see section 13:
 
 ```bash
 cd docker/prowlarr && docker compose up -d && cd ../.. && cd docker/sonarr && docker compose up -d && cd ../.. && cd docker/radarr && docker compose up -d && cd ../..
@@ -448,7 +449,19 @@ cd ../..
 
 Verify: `docker exec tailscale tailscale status`
 
-**RomM** — see section 11 for required values:
+**Cloudflare Tunnel** — see section 11 for required values:
+
+```bash
+cd docker/cloudflared
+cp .env.template .env
+nano .env   # fill in CLOUDFLARE_TUNNEL_TOKEN
+docker compose up -d
+cd ../..
+```
+
+Verify: `docker logs cloudflared --tail 20` shows a successful connection (no auth errors).
+
+**RomM** — see section 12 for required values:
 
 ```bash
 cd docker/romm
@@ -595,7 +608,30 @@ Goal:
 - Keep app services LAN-only.
 - Reach them remotely through VPN instead of exposing app ports directly to WAN.
 
-## 11) RomM (Default Service)
+## 11) Cloudflare Tunnel (Default Service)
+
+Exposes FoundryVTT (or any other service) to the public internet without opening any inbound port on your router — `cloudflared` makes an outbound-only connection to Cloudflare, which terminates HTTPS and proxies requests through the tunnel.
+
+Config files:
+
+- `docker/cloudflared/docker-compose.yml`
+- `docker/cloudflared/.env` (created from `.env.template` by deploy.sh if missing)
+
+Required value:
+
+- `CLOUDFLARE_TUNNEL_TOKEN`
+
+One-time manual setup, before `docker compose up -d` will do anything useful (these steps are in the Cloudflare dashboard, not this repo):
+
+1. [Add your domain to Cloudflare](https://developers.cloudflare.com/fundamentals/manage-domains/add-site/) (changes your domain's nameservers to Cloudflare's — do this first, DNS propagation can take a while).
+2. Cloudflare Zero Trust dashboard -> **Networking** -> **Tunnels** -> **Create a tunnel** -> name it -> choose **Docker** as the connector -> copy the token value out of the install command (the long string after `run --token`, not the whole command) into `CLOUDFLARE_TUNNEL_TOKEN`.
+3. On the same tunnel, **Routes** tab -> **Add route** -> **Published application** -> pick a subdomain (e.g. `foundry.yourdomain.com`) -> **Service URL** = `http://10.0.20.10:30000` (your host's LAN IP + FoundryVTT's port — adjust the IP to match `hostname -I`).
+
+Once that route exists and the container is running, the subdomain is live on the internet immediately — anyone with the link can reach it. Add a [Cloudflare Access application](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/self-hosted-public-app/) on top if you want to restrict who can load the page (e.g. email-based login) before it even reaches Foundry's own password prompt.
+
+Also set `FOUNDRY_PROXY_SSL: true` in `docker/foundryvtt/docker-compose.yml` once the route is live, so Foundry knows it's being served over HTTPS by the tunnel and generates correct invite links/A/V behavior.
+
+## 12) RomM (Default Service)
 
 RomM is part of the default install and is started automatically.
 
@@ -619,7 +655,7 @@ Default library path:
 
 - `/mnt/nas/roms`
 
-## 12) First-Time App Configuration Notes
+## 13) First-Time App Configuration Notes
 
 ### Transmission
 
@@ -647,7 +683,7 @@ Default library path:
 
 - Add libraries from `/mnt/nas/tv` and `/mnt/nas/movies`.
 
-## 13) Useful Commands
+## 14) Useful Commands
 
 Bring up a service:
 

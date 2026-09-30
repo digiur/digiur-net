@@ -16,3 +16,4 @@ sonarr
 transmission-plus-gluetun
 foundryvtt
 tailscale
+cloudflared
