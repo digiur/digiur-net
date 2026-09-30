@@ -2,7 +2,7 @@
 name: qdirstat
 services:
   qdirstat:
-    image: linuxserver/qdirstat
+    image: lscr.io/linuxserver/qdirstat:latest
     cpu_shares: 1024
     container_name: qdirstat
 
