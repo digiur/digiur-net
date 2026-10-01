@@ -53,8 +53,7 @@ echo "Watching $FORWARD_FILE for changes"
 
 handle_port_change
 
-# Watch the *directory* for the forwarded_port file being created/moved
-inotifywait -m -e moved_to -e create "$FORWARD_DIR" | while read -r _ DIR FILENAME; do
+inotifywait -m -e close_write "$FORWARD_DIR" | while read -r _ DIR FILENAME; do
   if [[ "$FILENAME" == "forwarded_port" ]]; then
     handle_port_change
   fi
