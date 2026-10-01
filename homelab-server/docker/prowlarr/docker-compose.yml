@@ -18,3 +18,18 @@ services:
       - /opt/digiur-net/prowlarr/config:/config
 
     restart: unless-stopped
+    depends_on:
+      - flaresolverr
+
+  # Solves Cloudflare JS challenges for indexers Prowlarr can't reach directly;
+  # configure as an Indexer Proxy in Prowlarr at http://flaresolverr:8191.
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    cpu_shares: 512
+    container_name: flaresolverr
+
+    environment:
+      LOG_LEVEL: info
+      TZ: America/Denver
+
+    restart: unless-stopped
