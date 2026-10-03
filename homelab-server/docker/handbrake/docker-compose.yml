@@ -8,7 +8,9 @@ services:
     environment:
       USER_ID: 1000
       GROUP_ID: 1000
-      AUTOMATED_CONVERSION: 0
+      AUTOMATED_CONVERSION: 1
+      AUTOMATED_CONVERSION_PRESET: 'Custom/H.265 QSV 1080p - 35'
+      AUTOMATED_CONVERSION_OUTPUT_SUBDIR: SAME_AS_SRC
 
     devices:
       - /dev/dri:/dev/dri
