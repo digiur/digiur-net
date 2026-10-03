@@ -20,6 +20,6 @@ services:
 
     volumes:
       - /opt/digiur-net/qdirstat/config:/config
-      - /:/data
+      - /:/data:rw
 
     restart: unless-stopped
