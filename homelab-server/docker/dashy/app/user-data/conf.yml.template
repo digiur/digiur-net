@@ -70,11 +70,7 @@ sections:
 
   - title: Web Speed (MySpeed)
     description: Speedtest From The Server To The Internet
-    url: http://{{HOST_IP}}:13378
-
-  - title: Portainer
-    description: Docker Manager
-    url: http://{{HOST_IP}}:9443
+    url: http://{{HOST_IP}}:5216
 
   - title: Prowl-arr!
     description: Torrent Indexer Search
@@ -82,7 +78,7 @@ sections:
 
   - title: QDirStat
     description: Disk usage analyzer
-    url: http://{{HOST_IP}}:3001
+    url: https://{{HOST_IP}}:3001
 
   - title: Rad-arr!
     description: Torrent Movie Search

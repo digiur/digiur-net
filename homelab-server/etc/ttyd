@@ -1,3 +1,0 @@
-# /etc/default/ttyd
-
-TTYD_OPTIONS="-W -p 7681 -O login"

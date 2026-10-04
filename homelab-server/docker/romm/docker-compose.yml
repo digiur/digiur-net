@@ -2,27 +2,29 @@
 name: romm
 volumes:
   romm_redis_data:
+  mysql_data:
+
 services:
   romm:
     image: rommapp/romm:latest
     cpu_shares: 1024
     container_name: romm
     depends_on:
-      - romm-db
+      romm-maria-db:
+        condition: service_healthy
 
     environment:
-      DB_HOST: romm-db
+      DB_HOST: romm-maria-db
       DB_NAME: romm # Should match MYSQL_DATABASE in mariadb
       DB_USER: romm-user # Should match MYSQL_USER in mariadb
       DB_PASSWD: ${ROMM_DB_PASSWORD} # Should match MYSQL_PASSWORD in mariadb
       ROMM_AUTH_SECRET_KEY: ${ROMM_AUTH_SECRET_KEY}
-      IGDB_CLIENT_ID: ${IGDB_CLIENT_ID}
-      IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET}
+      HASHEOUS_API_ENABLED: "true"
       ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: true
       TZ: America/Denver
 
     volumes:
-      - /opt/digiur-net/romm/resources:/romm/resources # Resources fetched from IGDB (covers, screenshots, etc.)
+      - /opt/digiur-net/romm/resources:/romm/resources # Metadata and artwork fetched by RomM
       - romm_redis_data:/redis-data # Cached data for background tasks
       - /mnt/nas/roms:/romm/library # Your game library
       - /opt/digiur-net/romm/assets:/romm/assets # Uploaded saves, states, etc.
@@ -33,15 +35,21 @@ services:
 
     restart: unless-stopped
 
-  romm-db:
-    image: mariadb:latest # if you experience issues, try: linuxserver/mariadb:latest
+  romm-maria-db:
+    image: lscr.io/linuxserver/mariadb:latest
     cpu_shares: 1024
-    container_name: romm-db
+    container_name: romm-maria-db
     restart: unless-stopped
     environment:
-      - MYSQL_ROOT_PASSWORD=${ROMM_DB_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${ROMM_DB_PASSWORD}
       - MYSQL_DATABASE=romm
       - MYSQL_USER=romm-user
       - MYSQL_PASSWORD=${ROMM_DB_PASSWORD}
     volumes:
-      - /opt/digiur-net/romm/db:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
