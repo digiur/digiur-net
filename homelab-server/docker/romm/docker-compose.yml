@@ -2,7 +2,7 @@
 name: romm
 volumes:
   romm_redis_data:
-  mysql_data:
+  mariadb_data:
 
 services:
   romm:
@@ -36,7 +36,7 @@ services:
     restart: unless-stopped
 
   romm-maria-db:
-    image: lscr.io/linuxserver/mariadb:latest
+    image: mariadb:latest
     cpu_shares: 1024
     container_name: romm-maria-db
     restart: unless-stopped
@@ -46,9 +46,9 @@ services:
       - MYSQL_USER=romm-user
       - MYSQL_PASSWORD=${ROMM_DB_PASSWORD}
     volumes:
-      - mysql_data:/config
+      - mariadb_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mariadb-admin", "ping", "--host=127.0.0.1", "--silent"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       start_period: 30s
       interval: 10s
       timeout: 5s
