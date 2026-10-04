@@ -46,9 +46,9 @@ services:
       - MYSQL_USER=romm-user
       - MYSQL_PASSWORD=${ROMM_DB_PASSWORD}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/config
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "mariadb-admin", "ping", "--host=127.0.0.1", "--silent"]
       start_period: 30s
       interval: 10s
       timeout: 5s

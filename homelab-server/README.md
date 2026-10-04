@@ -640,9 +640,8 @@ Generate unique values for these secrets before starting the stack:
 
 - `ROMM_AUTH_SECRET_KEY`
 - `ROMM_DB_PASSWORD`
-- `ROMM_DB_ROOT_PASSWORD`
 
-Generate the auth key with `openssl rand -hex 32`. Generate a separate database password for each database variable, for example with `openssl rand -hex 24`.
+Generate the auth key with `openssl rand -hex 32` and the database password with `openssl rand -hex 24`. RomM and MariaDB root share the same database password.
 
 Default library path:
 
