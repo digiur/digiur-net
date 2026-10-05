@@ -1,24 +1,4 @@
 digiur-net.log
 
-# Ignore runtime/generated files in docker by default
-docker/**
-
-# Keep directories visible so specific file exceptions below work
-!docker/**/
-
-# Explicitly track compose definitions
-!docker/**/docker-compose.yml
-
-# Explicitly track templates/docs needed for first-time setup
-!docker/transmission-plus-gluetun/.env.template
-!docker/foundryvtt/.env.template
-!docker/tailscale/.env.template
-!docker/romm/.env.template
-!docker/qdirstat/.env.template
-!docker/jellyfin/.env.template
-!docker/mealie/.env.template
-!docker/librespeed/.env.template
-!docker/dashy/app/user-data/conf.yml.template
-!docker/transmission-plus-gluetun/watch-gluetun-port.sh
-!docker/transmission-plus-gluetun/watch-gluetun-port.service
-!docker/cloudflared/.env.template
+# Local Compose secrets; .env.template files remain trackable.
+.env

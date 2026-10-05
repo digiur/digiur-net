@@ -22,8 +22,7 @@ services:
       - /storage/downloads/raw:/storage/downloads/raw
 
     environment:
-      # USER/PASS come from ./.env (see .env.template); deploy.sh only
-      # validates they're set, it won't fill them in for you.
+      # USER/PASS come from ./.env (copy .env.template here first).
       USER: ${DESIRED_TRANSMISSION_USER}
       PASS: ${DESIRED_TRANSMISSION_PASS}
       PGID: 1000
@@ -53,8 +52,7 @@ services:
       - /opt/digiur-net/transmission-plus-gluetun/gluetun:/gluetun
 
     environment:
-      # OPENVPN_USER/OPENVPN_PASSWORD come from ./.env (see .env.template);
-      # deploy.sh only validates they're set, it won't fill them in for you.
+      # OPENVPN_USER/OPENVPN_PASSWORD come from ./.env (copy .env.template here first).
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=openvpn
       - OPENVPN_USER=${PROTON_VPN_USER}

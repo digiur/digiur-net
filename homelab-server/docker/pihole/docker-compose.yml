@@ -1,0 +1,33 @@
+# Host networking (not bridge) so Pi-hole sees real client IPs instead of the
+# Docker gateway IP for every query — without it, per-client stats are useless.
+# That means no ports: mapping (ignored in host mode) and no container-side
+# port conflicts to manage, just host-side ones:
+#   - 53/tcp+udp: requires the host's systemd-resolved stub listener disabled
+#     first (see README) or Pi-hole can't bind the port.
+#   - Web UI moved to 8053: dashy already owns host port 80.
+---
+name: pihole
+services:
+  pihole:
+    image: pihole/pihole:latest
+    cpu_shares: 1024
+    container_name: pihole
+
+    network_mode: host
+
+    environment:
+      TZ: America/Denver
+      # Password comes from ./.env (copy .env.template here first).
+      FTLCONF_webserver_api_password: ${PIHOLE_WEBPASSWORD}
+      FTLCONF_webserver_port: '8053o,[::]:8053o'
+      # Required for cross-VLAN clients (e.g. Trusted) to query this resolver;
+      # the OPNsense firewall — not Pi-hole — is what gates who can reach it.
+      FTLCONF_dns_listeningMode: 'ALL'
+      # Forward to OPNsense's Unbound instead of a public resolver, so Unbound
+      # keeps doing the actual recursive resolution and blocklist enforcement.
+      FTLCONF_dns_upstreams: '10.0.99.1'
+
+    volumes:
+      - /opt/digiur-net/pihole/etc-pihole:/etc/pihole
+
+    restart: unless-stopped
