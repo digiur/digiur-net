@@ -99,3 +99,7 @@ sections:
   - title: FoundryVTT
     description: Virtual Tabletop
     url: http://{{HOST_IP}}:30000
+
+  - title: PiHole
+    description: Custom DNS!
+    url: http://{{HOST_IP}}:8053/admin/

@@ -26,6 +26,8 @@ services:
       # Forward to OPNsense's Unbound instead of a public resolver, so Unbound
       # keeps doing the actual recursive resolution and blocklist enforcement.
       FTLCONF_dns_upstreams: '10.0.20.1'
+      # Keep Unbound as the sole blocking layer; Pi-hole provides query visibility.
+      FTLCONF_dns_blocking_active: 'false'
 
     volumes:
       - /opt/digiur-net/pihole/etc-pihole:/etc/pihole

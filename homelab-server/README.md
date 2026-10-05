@@ -345,6 +345,57 @@ Verify: `curl -I http://<host-ip>:5800`.
 
 Note: HandBrake's automated converter is a blind preset-apply with no library awareness. If you outgrow manual conversion, [Tdarr](https://docs.tdarr.io/) (library-aware, plugin-based, skips already-optimized files) or [Unmanic](https://docs.unmanic.app/) (lighter-weight equivalent) are purpose-built alternatives worth a look before automating this again.
 
+### Pi-hole DNS (optional)
+
+Pi-hole uses host networking so its query log records real client IPs. Keep the N100's host resolver pointed at OPNsense (`10.0.20.1`); Pi-hole also forwards to that Unbound resolver. Use the N100's reserved VLAN 20 address as `<pihole-ip>` below.
+
+Start and test Pi-hole directly before changing Docker's DNS or any DHCP scopes:
+
+```bash
+cd docker/pihole
+cp .env.template .env
+openssl rand -base64 24
+nano .env   # set PIHOLE_WEBPASSWORD to the generated value
+docker compose config --quiet
+docker compose up -d
+docker compose ps
+nslookup example.com <pihole-ip>
+```
+
+The password must be non-empty; a blank Pi-hole v6 web API password disables web authentication. The web UI is at `http://<host-ip>:8053/admin/`.
+
+#### Pi-hole web UI
+
+Log in with the password in `docker/pihole/.env`. Compose configures the web port, listening mode, and Unbound upstream (`10.0.20.1`); these environment-backed settings are read-only in Pi-hole and should be changed in Compose instead. DNS query logging is enabled by default, so no extra UI setup is needed for the Query Log.
+
+For this setup, Unbound remains the only DNS blocking layer. Pi-hole's own blocking is disabled in Compose, so do not add the Unbound blocklists again under Pi-hole's **Lists** page. Use **Query Log** to inspect client queries once clients or Docker containers are using Pi-hole. If the filtering design changes later, Pi-hole lists are managed separately in the web UI and must be applied with **Update Gravity**.
+
+Configure Docker's default DNS so bridge-network containers use Pi-hole. Edit `/etc/docker/daemon.json`, preserving any existing settings and merging in this property with the N100's reserved IP:
+
+```json
+{
+   "dns": ["<pihole-ip>"]
+}
+```
+
+Validate the configuration, then restart Docker:
+
+```bash
+sudo dockerd --validate --config-file=/etc/docker/daemon.json
+sudo systemctl restart docker
+```
+
+The restart briefly interrupts containers; Pi-hole's `unless-stopped` policy should bring it back. Wait for Pi-hole to answer a DNS query before continuing. Then recreate each existing bridge-network Compose stack so its containers receive the new DNS setting:
+
+```bash
+cd docker/<service>
+docker compose up -d --force-recreate
+```
+
+Do not add OPNsense as a second Docker DNS server if you want container queries to consistently pass through Pi-hole; Docker/application resolver behavior does not guarantee a strict primary/fallback order. If Pi-hole is unavailable, containers may temporarily lose DNS, but the host remains able to resolve names through OPNsense and restart the Pi-hole stack. Host-network containers continue using the host's resolver; Pi-hole's own forwarding is explicitly configured to OPNsense.
+
+Finally, allow each client VLAN that should use Pi-hole to reach `<pihole-ip>` on TCP/UDP port 53, with the pass rule above that VLAN's private-range block. Change DHCP option 6 on one test VLAN to `<pihole-ip>`, renew a client lease, and verify DNS before applying the change to other VLANs. To roll back, restore that scope's prior DNS option (OPNsense's interface address) and renew the test client's lease.
+
 ### Services With Minor Setup
 
 No manually-supplied secrets, but need a generated value or later in-app configuration.
