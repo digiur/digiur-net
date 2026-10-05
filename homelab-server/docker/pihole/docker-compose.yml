@@ -25,7 +25,7 @@ services:
       FTLCONF_dns_listeningMode: 'ALL'
       # Forward to OPNsense's Unbound instead of a public resolver, so Unbound
       # keeps doing the actual recursive resolution and blocklist enforcement.
-      FTLCONF_dns_upstreams: '10.0.99.1'
+      FTLCONF_dns_upstreams: '10.0.20.1'
 
     volumes:
       - /opt/digiur-net/pihole/etc-pihole:/etc/pihole
