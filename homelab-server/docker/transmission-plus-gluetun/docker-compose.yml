@@ -61,7 +61,7 @@ services:
       - PORT_FORWARD_ONLY=on
       # Requests the forwarded port; requires +pmp on OPENVPN_USER for ProtonVPN (see .env.template)
       - VPN_PORT_FORWARDING=on
-      - SERVER_COUNTRIES=Netherlands
+      - SERVER_COUNTRIES=Switzerland
       - VPN_PORT_FORWARDING_STATUS_FILE=/gluetun/forwarded_port
       - TZ=America/Denver
 
