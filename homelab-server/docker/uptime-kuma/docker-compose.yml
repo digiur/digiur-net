@@ -11,9 +11,9 @@ services:
       TZ: America/Denver
 
     ports:
-      - 3001:3001
+      - 3002:3001
 
     volumes:
-      - ./app/data:/app/data
+      - /opt/digiur-net/uptimekuma/data:/app/data
 
     restart: unless-stopped
